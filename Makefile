@@ -9,6 +9,9 @@ sync-charts:
 	helm pull oci://ghcr.io/kserve/charts/kserve-resources --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
 	helm pull oci://ghcr.io/kserve/charts/kserve-crd --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
 	helm pull oci://ghcr.io/kserve/charts/kserve-runtime-configs --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
+	@for chart in kserve-resources kserve-crd kserve-runtime-configs; do \
+		sed -i 's/^version: .*/version: "[[ .Version ]]"/' $(CHART_DIR)/$$chart/Chart.yaml; \
+	done
 
 .PHONY: build
 build:
