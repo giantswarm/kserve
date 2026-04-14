@@ -34,13 +34,13 @@ workflows:
             branches:
               ignore: /.*/
 
-      # Chart: kserve (controller)
+      # Chart: kserve-resources (controller + config)
       - architect/push-to-app-catalog:
           context: architect
-          name: build-kserve-chart
+          name: build-kserve-resources-chart
           app_catalog: giantswarm-catalog
           app_catalog_test: giantswarm-test-catalog
-          chart: kserve
+          chart: kserve-resources
           push_to_appcatalog: false
           push_to_oci_registry: true
           explicit_allow_chart_name_mismatch: true
@@ -59,6 +59,24 @@ workflows:
           app_catalog: giantswarm-catalog
           app_catalog_test: giantswarm-test-catalog
           chart: kserve-crd
+          push_to_appcatalog: false
+          push_to_oci_registry: true
+          explicit_allow_chart_name_mismatch: true
+          persist_chart_archive: true
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - main
+
+      # Chart: kserve-runtime-configs (ClusterServingRuntimes)
+      - architect/push-to-app-catalog:
+          context: architect
+          name: build-kserve-runtime-configs-chart
+          app_catalog: giantswarm-catalog
+          app_catalog_test: giantswarm-test-catalog
+          chart: kserve-runtime-configs
           push_to_appcatalog: false
           push_to_oci_registry: true
           explicit_allow_chart_name_mismatch: true

@@ -2,4 +2,26 @@
   "extends": [
     "github>giantswarm/renovate-presets:default.json5",
   ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "KServe version in Makefile",
+      "fileMatch": ["^Makefile$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\nKSERVE_VERSION \\?= (?<currentValue>.*?)\\n",
+      ],
+    },
+  ],
+  "packageRules": [
+    {
+      "description": "Group all KServe version updates together",
+      "matchPackageNames": ["kserve/kserve"],
+      "groupName": "kserve",
+    },
+    {
+      "description": "Group golang base image updates",
+      "matchPackageNames": ["golang"],
+      "groupName": "golang",
+    },
+  ],
 }

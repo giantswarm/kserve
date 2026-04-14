@@ -2,19 +2,19 @@ annotations:
   category: AI/Machine Learning
 apiVersion: v2
 appVersion: v0.17.0
-description: Helm chart for deploying kserve crds
+description: Helm chart for deploying kserve resources
 home: https://kserve.github.io/website/
 icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
 keywords:
 - kserve
 - modelmesh
-- crd
-- kubernetes
-- custom-resources
+- inference
+- machine-learning
+- model-serving
 maintainers:
 - name: KServe Team
   url: https://github.com/kserve/kserve
-name: kserve-crd
+name: kserve-resources
 sources:
 - https://github.com/kserve/kserve
 type: application

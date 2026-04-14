@@ -1,8 +1,10 @@
 # Multi-stage build for the KServe controller.
 # Fetches upstream source at the pinned version and cross-compiles for the target platform.
-ARG KSERVE_VERSION=v0.16.0
+# renovate: datasource=github-releases depName=kserve/kserve
+ARG KSERVE_VERSION=v0.17.0
 
-FROM --platform=$BUILDPLATFORM golang:1.24 AS builder
+# renovate: datasource=docker depName=golang
+FROM --platform=$BUILDPLATFORM golang:1.25 AS builder
 
 ARG KSERVE_VERSION
 ARG TARGETOS
