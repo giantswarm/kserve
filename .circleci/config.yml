@@ -1,0 +1,71 @@
+version: 2.1
+
+orbs:
+  architect: giantswarm/architect@6.15.0
+
+workflows:
+  build:
+    jobs:
+      # Branch builds: amd64 only for faster PR feedback.
+      # The Dockerfile is self-contained (clones upstream and cross-compiles),
+      # so no go-build step is needed.
+      - architect/push-to-registries:
+          context: architect
+          name: push-to-registries
+          image: giantswarm/kserve-controller
+          multiarch: false
+          platforms: "linux/amd64"
+          force-public: true
+          filters:
+            branches:
+              ignore:
+                - main
+
+      # Tag builds: full multi-arch (amd64 + arm64)
+      - architect/push-to-registries:
+          context: architect
+          name: push-to-registries-release
+          image: giantswarm/kserve-controller
+          multiarch: true
+          force-public: true
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      # Chart: kserve (controller)
+      - architect/push-to-app-catalog:
+          context: architect
+          name: build-kserve-chart
+          app_catalog: giantswarm-catalog
+          app_catalog_test: giantswarm-test-catalog
+          chart: kserve
+          push_to_appcatalog: false
+          push_to_oci_registry: true
+          explicit_allow_chart_name_mismatch: true
+          persist_chart_archive: true
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - main
+
+      # Chart: kserve-crd
+      - architect/push-to-app-catalog:
+          context: architect
+          name: build-kserve-crd-chart
+          app_catalog: giantswarm-catalog
+          app_catalog_test: giantswarm-test-catalog
+          chart: kserve-crd
+          push_to_appcatalog: false
+          push_to_oci_registry: true
+          explicit_allow_chart_name_mismatch: true
+          persist_chart_archive: true
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - main
