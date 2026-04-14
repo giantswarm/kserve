@@ -12,6 +12,7 @@ sync-charts:
 	@for chart in kserve-resources kserve-crd kserve-runtime-configs; do \
 		sed -i 's/^version: .*/version: "[[ .Version ]]"/' $(CHART_DIR)/$$chart/Chart.yaml; \
 	done
+	@sed -i 's/\([0-9]\) #/\1  #/g' $(CHART_DIR)/kserve-runtime-configs/values.yaml
 
 .PHONY: build
 build:
