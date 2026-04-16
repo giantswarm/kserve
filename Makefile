@@ -1,19 +1,25 @@
-# renovate: datasource=github-releases depName=kserve/kserve
-KSERVE_VERSION ?= v0.17.0
+# DO NOT EDIT. Generated with:
+#
+#    devctl
+#
+#    https://github.com/giantswarm/devctl/blob/c2dd604fd787d9aa63ec6c43c817c8596f1356f7/pkg/gen/input/makefile/internal/file/Makefile.template
+#
 
-CHART_DIR := helm
+include Makefile.*.mk
 
-.PHONY: sync-charts
-sync-charts:
-	rm -rf $(CHART_DIR)/kserve-resources $(CHART_DIR)/kserve-crd $(CHART_DIR)/kserve-runtime-configs
-	helm pull oci://ghcr.io/kserve/charts/kserve-resources --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
-	helm pull oci://ghcr.io/kserve/charts/kserve-crd --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
-	helm pull oci://ghcr.io/kserve/charts/kserve-runtime-configs --version $(KSERVE_VERSION) --untar --untardir $(CHART_DIR)/
-	@for chart in kserve-resources kserve-crd kserve-runtime-configs; do \
-		sed -i 's/^version: .*/version: "[[ .Version ]]"/' $(CHART_DIR)/$$chart/Chart.yaml; \
-	done
-	@sed -i 's/\([0-9]\) #/\1  #/g' $(CHART_DIR)/kserve-runtime-configs/values.yaml
+##@ General
 
-.PHONY: build
-build:
-	docker buildx build --platform linux/arm64 -t kserve-controller:dev --load .
+# The help target prints out all targets with their descriptions organized
+# beneath their categories. The categories are represented by '##@' and the
+# target descriptions by '##'. The awk commands is responsible for reading the
+# entire set of makefiles included in this invocation, looking for lines of the
+# file as xyz: ## something, and then pretty-format the target and help. Then,
+# if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info on the usage of ANSI control characters for terminal formatting:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info on the awk command:
+# http://linuxcommand.org/lc3_adv_awk.php
+
+.PHONY: help
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z%\\\/_0-9-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
