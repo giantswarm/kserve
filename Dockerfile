@@ -4,7 +4,7 @@
 ARG KSERVE_VERSION=v0.17.0
 
 # renovate: datasource=docker depName=golang
-FROM --platform=$BUILDPLATFORM golang:1.25 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26 AS builder
 
 ARG KSERVE_VERSION
 ARG TARGETOS
