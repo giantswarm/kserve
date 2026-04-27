@@ -47,4 +47,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "kserve-resources.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
