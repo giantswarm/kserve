@@ -420,17 +420,17 @@ spec:
           fi
 
           export RAY_ADDRESS=${POD_IP}:${RAY_PORT}
-          ray start --head --disable-usage-stats --include-dashboard false 
+          ray start --head --disable-usage-stats --include-dashboard false
           python ./huggingfaceserver/health_check.py registered_nodes --retries 200  --probe_name runtime_start
 
-          python -m huggingfaceserver --model_dir=${MODEL} --tensor-parallel-size=${TENSOR_PARALLEL_SIZE} --pipeline-parallel-size=${PIPELINE_PARALLEL_SIZE} $0 $@        
+          python -m huggingfaceserver --model_dir=${MODEL} --tensor-parallel-size=${TENSOR_PARALLEL_SIZE} --pipeline-parallel-size=${PIPELINE_PARALLEL_SIZE} $0 $@
       securityContext:
           {{- with .Values.kserve.servingruntime.huggingfaceserver_multinode.securityContext}}
           {{- toYaml . | nindent 10 }}
           {{- end }}
       env:
         - name: RAY_PORT
-          value: "6379"        
+          value: "6379"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -438,11 +438,11 @@ spec:
         - name: POD_IP
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP  
+              fieldPath: status.podIP
         - name: VLLM_CONFIG_ROOT
-          value: /tmp      
+          value: /tmp
         - name: HF_HUB_CACHE
-          value: /tmp          
+          value: /tmp
       resources:
         requests:
           cpu: "2"
@@ -483,7 +483,7 @@ spec:
             - bash
             - -c
             - |
-              python ./huggingfaceserver/health_check.py registered_node_and_runtime_health --health_check_url http://localhost:8080 --probe_name head_startup          
+              python ./huggingfaceserver/health_check.py registered_node_and_runtime_health --health_check_url http://localhost:8080 --probe_name head_startup
       {{- if .Values.kserve.servingruntime.huggingfaceserver_multinode.shm.enabled }}
       volumeMounts:
         - name: shm
@@ -516,7 +516,7 @@ spec:
           export RAY_HEAD_ADDRESS=${HEAD_SVC}.${POD_NAMESPACE}.svc.cluster.local:6379
           SECONDS=0
 
-          while true; do              
+          while true; do
             if (( SECONDS <= 240 )); then
               if ray health-check --address "${RAY_HEAD_ADDRESS}" > /dev/null 2>&1; then
                 echo "Ray Global Control Service(GCS) is ready."
@@ -539,7 +539,7 @@ spec:
         securityContext:
             {{- with .Values.kserve.servingruntime.huggingfaceserver_multinode.securityContext}}
             {{- toYaml . | nindent 10 }}
-            {{- end }}          
+            {{- end }}
         env:
           - name: POD_NAME
             valueFrom:
@@ -582,11 +582,11 @@ spec:
           exec:
             command:
               - bash
-              - -c 
+              - -c
               - |
                 export RAY_HEAD_NODE=${HEAD_SVC}.${POD_NAMESPACE}.svc.cluster.local
                 export RAY_ADDRESS=${RAY_HEAD_NODE}:6379
-                python ./huggingfaceserver/health_check.py registered_node_and_runtime_models --runtime_url http://${RAY_HEAD_NODE}:8080/v1/models --probe_name worker_startup    
+                python ./huggingfaceserver/health_check.py registered_node_and_runtime_models --runtime_url http://${RAY_HEAD_NODE}:8080/v1/models --probe_name worker_startup
     {{- if .Values.kserve.servingruntime.huggingfaceserver_multinode.shm.enabled }}
     volumes:
       - name: shm

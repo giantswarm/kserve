@@ -50,5 +50,3 @@
 {{ toYaml $resource }}
 {{ end -}}
 {{- end }}
-
-

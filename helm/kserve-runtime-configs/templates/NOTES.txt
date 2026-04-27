@@ -18,4 +18,3 @@ To learn more about the release, try:
 {{- else }}
   ✗ LLMInferenceServiceConfigs: Disabled
 {{- end }}
-
