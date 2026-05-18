@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate image pushes from the deprecated `architect/push-to-registries-multiarch` job to `push-to-registries` with `multiarch: true`. Picks up the orb v8.1.0 QEMU/binfmt auto-registration, hardened buildx bootstrap, and standard OCI image labels.
 - Update to KServe v0.17.0 (Go 1.25, chart restructuring).
 - Upstream chart `kserve` renamed to `kserve-resources`; added new `kserve-runtime-configs` chart.
 - Add Renovate custom manager for automatic KServe version tracking.
