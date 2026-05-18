@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@8.1.0
+  architect: giantswarm/architect@8.0.2
 
 workflows:
   build:
@@ -9,8 +9,9 @@ workflows:
       # Branch builds: amd64 only for faster PR feedback.
       # The Dockerfile is self-contained (clones upstream and cross-compiles),
       # so no go-build step is needed.
-      - architect/push-to-registries-multiarch:
+      - architect/push-to-registries:
           context: architect
+          multiarch: true
           name: push-to-registries
           image: giantswarm/kserve-controller
           platforms: "linux/amd64"
@@ -21,8 +22,9 @@ workflows:
                 - main
 
       # Tag builds: full multi-arch (amd64 + arm64)
-      - architect/push-to-registries-multiarch:
+      - architect/push-to-registries:
           context: architect
+          multiarch: true
           name: push-to-registries-release
           image: giantswarm/kserve-controller
           force-public: true
