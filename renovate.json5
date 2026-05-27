@@ -6,7 +6,7 @@
     {
       "customType": "regex",
       "description": "KServe version in Makefile",
-      "fileMatch": ["^Makefile$"],
+      "managerFilePatterns": ["^Makefile$"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\nKSERVE_VERSION \\?= (?<currentValue>.*?)\\n",
       ],
