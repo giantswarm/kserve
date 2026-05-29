@@ -1,27 +1,33 @@
 {
-  "extends": [
-    "github>giantswarm/renovate-presets:default.json5",
+  extends: [
+    'github>giantswarm/renovate-presets:default.json5',
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "description": "KServe version in Makefile",
-      "managerFilePatterns": ["^Makefile$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\nKSERVE_VERSION \\?= (?<currentValue>.*?)\\n",
+      customType: 'regex',
+      description: 'KServe version in Makefile',
+      managerFilePatterns: [
+        '/^Makefile$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\nKSERVE_VERSION \\?= (?<currentValue>.*?)\\n',
       ],
     },
   ],
-  "packageRules": [
+  packageRules: [
     {
-      "description": "Group all KServe version updates together",
-      "matchPackageNames": ["kserve/kserve"],
-      "groupName": "kserve",
+      description: 'Group all KServe version updates together',
+      matchPackageNames: [
+        'kserve/kserve',
+      ],
+      groupName: 'kserve',
     },
     {
-      "description": "Group golang base image updates",
-      "matchPackageNames": ["golang"],
-      "groupName": "golang",
+      description: 'Group golang base image updates',
+      matchPackageNames: [
+        'golang',
+      ],
+      groupName: 'golang',
     },
   ],
 }
