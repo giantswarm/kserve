@@ -5,7 +5,7 @@ appVersion: v0.17.0
 description: KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference
   Configs
 home: https://kserve.github.io/website/
-icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
+icon: https://s.giantswarm.io/app-icons/kserve/1/light.svg
 keywords:
 - kserve
 - clusterservingruntime
