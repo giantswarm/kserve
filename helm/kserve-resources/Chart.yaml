@@ -4,7 +4,7 @@ apiVersion: v2
 appVersion: v0.17.0
 description: Helm chart for deploying kserve resources
 home: https://kserve.github.io/website/
-icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
+icon: https://s.giantswarm.io/app-icons/kserve/1/light.svg
 keywords:
 - kserve
 - modelmesh
