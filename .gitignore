@@ -1,1 +1,4 @@
 *.tgz
+
+# graphify knowledge graph (regenerable, rebuilt by the post-commit hook)
+graphify-out/
