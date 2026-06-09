@@ -1,23 +1,20 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "additionalProperties": false,
     "properties": {
         "global": {
+            "description": "Global values shared between all subcharts",
+            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key.",
             "type": [
                 "object",
                 "null"
-            ],
-            "description": "Global values shared between all subcharts",
-            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key."
+            ]
         },
         "kserve": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "autoscaler": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "scaleDownStabilizationWindowSeconds": {
                             "type": "string"
@@ -25,19 +22,17 @@
                         "scaleUpStabilizationWindowSeconds": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "inferenceservice": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "resources": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "limits": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -45,11 +40,11 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "requests": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -57,24 +52,26 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "llmisvcConfigs": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "type": "boolean"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "opentelemetryCollector": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "metricReceiverEndpoint": {
                             "type": "string"
@@ -84,7 +81,6 @@
                         },
                         "resource": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "cpuLimit": {
                                     "type": "string"
@@ -98,29 +94,29 @@
                                 "memoryRequest": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "scrapeInterval": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "security": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "autoMountServiceAccountToken": {
                             "type": "boolean"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "servingruntime": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "art": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "defaultVersion": {
                                     "type": "string"
@@ -131,18 +127,17 @@
                                 "imagePullSecrets": {
                                     "type": "array"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "enabled": {
                             "type": "boolean"
                         },
                         "huggingfaceserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "devShm": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "enabled": {
                                             "type": "boolean"
@@ -150,19 +145,20 @@
                                         "sizeLimit": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "disabled": {
                                     "type": "boolean"
                                 },
                                 "hostIPC": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "enabled": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "image": {
                                     "type": "string"
@@ -178,14 +174,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -193,7 +187,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -201,16 +196,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "huggingfaceserver_multinode": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -220,14 +216,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -235,7 +229,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -243,11 +238,11 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "shm": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "enabled": {
                                             "type": "boolean"
@@ -255,13 +250,14 @@
                                         "sizeLimit": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "lgbserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -277,14 +273,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -292,7 +286,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -300,16 +295,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "mlserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -328,14 +324,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -343,7 +337,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -351,19 +346,20 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "modelNamePlaceholder": {
                             "type": "string"
                         },
                         "paddleserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -379,14 +375,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -394,7 +388,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -402,16 +397,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "pmmlserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -427,14 +423,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -442,7 +436,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -450,16 +445,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "predictiveserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -475,14 +471,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -490,7 +484,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -498,16 +493,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "sklearnserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -523,14 +519,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -538,7 +532,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -546,16 +541,17 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "tensorflow": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -571,14 +567,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -586,7 +580,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -597,16 +592,17 @@
                                         "runAsUser": {
                                             "type": "integer"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "torchserve": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -622,14 +618,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -637,7 +631,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -648,7 +643,8 @@
                                         "runAsUser": {
                                             "type": "integer"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "serviceEnvelopePlaceholder": {
                                     "type": "string"
@@ -656,11 +652,11 @@
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "tritonserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -676,14 +672,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -691,7 +685,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -702,16 +697,17 @@
                                         "runAsUser": {
                                             "type": "integer"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "xgbserver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "disabled": {
                                     "type": "boolean"
@@ -727,14 +723,12 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -742,7 +736,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -750,19 +745,24 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "version": {
                     "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         }
-    }
+    },
+    "additionalProperties": false
 }

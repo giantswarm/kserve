@@ -33,6 +33,7 @@ Common labels
 */}}
 {{- define "kserve-runtime-configs.labels" -}}
 helm.sh/chart: {{ include "kserve-runtime-configs.chart" . }}
+application.giantswarm.io/team: {{ index .Chart.Annotations "application.giantswarm.io/team" | quote }}
 {{ include "kserve-runtime-configs.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

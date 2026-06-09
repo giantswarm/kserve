@@ -1,23 +1,20 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "additionalProperties": false,
     "properties": {
         "global": {
+            "description": "Global values shared between all subcharts",
+            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key.",
             "type": [
                 "object",
                 "null"
-            ],
-            "description": "Global values shared between all subcharts",
-            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key."
+            ]
         },
         "kserve": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "agent": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "image": {
                             "type": "string"
@@ -25,11 +22,11 @@
                         "tag": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "autoscaler": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "scaleDownStabilizationWindowSeconds": {
                             "type": "string"
@@ -37,20 +34,20 @@
                         "scaleUpStabilizationWindowSeconds": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "certManager": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "controller": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "affinity": {
                             "type": "object",
@@ -62,14 +59,12 @@
                         },
                         "containerSecurityContext": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "allowPrivilegeEscalation": {
                                     "type": "boolean"
                                 },
                                 "capabilities": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "drop": {
                                             "type": "array",
@@ -77,7 +72,8 @@
                                                 "type": "string"
                                             }
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "privileged": {
                                     "type": "boolean"
@@ -88,14 +84,14 @@
                                 "runAsNonRoot": {
                                     "type": "boolean"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "deploymentMode": {
                             "type": "string"
                         },
                         "gateway": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "additionalIngressDomains": {
                                     "type": "array"
@@ -114,7 +110,6 @@
                                 },
                                 "ingressGateway": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "className": {
                                             "type": "string"
@@ -131,11 +126,11 @@
                                         "kserveGateway": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "localGateway": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "gateway": {
                                             "type": "string"
@@ -146,7 +141,8 @@
                                         "knativeGatewayService": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "pathTemplate": {
                                     "type": "string"
@@ -154,7 +150,8 @@
                                 "urlScheme": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "image": {
                             "type": "string"
@@ -164,12 +161,12 @@
                         },
                         "knativeAddressableResolver": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "enabled": {
                                     "type": "boolean"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "labels": {
                             "type": "object",
@@ -195,15 +192,12 @@
                         },
                         "rbacProxy": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "resources": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "limits": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "cpu": {
                                                     "type": "string"
@@ -211,11 +205,11 @@
                                                 "memory": {
                                                     "type": "string"
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "requests": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "cpu": {
                                                     "type": "string"
@@ -223,20 +217,20 @@
                                                 "memory": {
                                                     "type": "string"
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "allowPrivilegeEscalation": {
                                             "type": "boolean"
                                         },
                                         "capabilities": {
                                             "type": "object",
-                                            "additionalProperties": false,
                                             "properties": {
                                                 "drop": {
                                                     "type": "array",
@@ -244,7 +238,8 @@
                                                         "type": "string"
                                                     }
                                                 }
-                                            }
+                                            },
+                                            "additionalProperties": false
                                         },
                                         "privileged": {
                                             "type": "boolean"
@@ -255,20 +250,20 @@
                                         "runAsNonRoot": {
                                             "type": "boolean"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "rbacProxyImage": {
                             "type": "string"
                         },
                         "resources": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "limits": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -276,11 +271,11 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "requests": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -288,27 +283,29 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "securityContext": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "runAsNonRoot": {
                                     "type": "boolean"
                                 },
                                 "seccompProfile": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "type": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "serviceAnnotations": {
                             "type": "object",
@@ -327,31 +324,29 @@
                             "type": "object",
                             "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "createSharedResources": {
                     "type": "boolean"
                 },
                 "inferenceServiceConfig": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "inferenceservice": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "resources": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "limits": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -359,11 +354,11 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "requests": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -371,19 +366,20 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "localmodel": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "agent": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "affinity": {
                                     "type": "object",
@@ -404,7 +400,6 @@
                                 },
                                 "securityContext": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "runAsNonRoot": {
                                             "type": "boolean"
@@ -412,7 +407,8 @@
                                         "runAsUser": {
                                             "type": "integer"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "tag": {
                                     "type": "string"
@@ -420,11 +416,11 @@
                                 "tolerations": {
                                     "type": "array"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "controller": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "image": {
                                     "type": "string"
@@ -432,7 +428,8 @@
                                 "tag": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "defaultJobImage": {
                             "type": "string"
@@ -454,18 +451,18 @@
                         },
                         "securityContext": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "fsGroup": {
                                     "type": "integer"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "metricsaggregator": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "enableMetricAggregation": {
                             "type": "string"
@@ -473,11 +470,11 @@
                         "enablePrometheusScraping": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "opentelemetryCollector": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "metricReceiverEndpoint": {
                             "type": "string"
@@ -487,7 +484,6 @@
                         },
                         "resource": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "cpuLimit": {
                                     "type": "string"
@@ -501,16 +497,17 @@
                                 "memoryRequest": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "scrapeInterval": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "router": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "image": {
                             "type": "string"
@@ -524,33 +521,32 @@
                         "tag": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "security": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "autoMountServiceAccountToken": {
                             "type": "boolean"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "service": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "serviceClusterIPNone": {
                             "type": "boolean"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "servingruntime": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "art": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "defaultVersion": {
                                     "type": "string"
@@ -558,13 +554,14 @@
                                 "image": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "storage": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "caBundleConfigMapName": {
                             "type": "string"
@@ -574,14 +571,12 @@
                         },
                         "containerSecurityContext": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "allowPrivilegeEscalation": {
                                     "type": "boolean"
                                 },
                                 "capabilities": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "drop": {
                                             "type": "array",
@@ -589,7 +584,8 @@
                                                 "type": "string"
                                             }
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "privileged": {
                                     "type": "boolean"
@@ -597,7 +593,8 @@
                                 "runAsNonRoot": {
                                     "type": "boolean"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "cpuModelcar": {
                             "type": "string"
@@ -613,11 +610,9 @@
                         },
                         "resources": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "limits": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -625,11 +620,11 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 },
                                 "requests": {
                                     "type": "object",
-                                    "additionalProperties": false,
                                     "properties": {
                                         "cpu": {
                                             "type": "string"
@@ -637,13 +632,14 @@
                                         "memory": {
                                             "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "s3": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                                 "CABundle": {
                                     "type": "string"
@@ -675,7 +671,8 @@
                                 "verifySSL": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "storageSecretNameAnnotation": {
                             "type": "string"
@@ -689,21 +686,24 @@
                         "uidModelcar": {
                             "type": "integer"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "storagecontainer": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "version": {
                     "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         }
-    }
+    },
+    "additionalProperties": false
 }
