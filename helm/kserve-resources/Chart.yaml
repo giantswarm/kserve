@@ -1,4 +1,5 @@
 annotations:
+  application.giantswarm.io/team: bumblebee
   category: AI/Machine Learning
 apiVersion: v2
 appVersion: v0.17.0

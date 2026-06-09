@@ -1,0 +1,19 @@
+---
+# kube-linter configuration for the kserve-resources chart.
+#
+# These resources are vendored upstream KServe controller manifests. The
+# exclusions below cover checks that are false positives or benign for these
+# manifests; they shipped unchanged in earlier releases and only began failing
+# the build when architect v9 (app-build-suite 2.1.2) started enforcing
+# kube-linter. Each exclusion is scoped and justified.
+checks:
+  exclude:
+    # SECRET_NAME holds the *name* of the webhook cert Secret
+    # (kserve-webhook-server-cert), not a credential value. The check is a
+    # name-pattern heuristic and misfires here.
+    - "env-var-secret"
+    # The controller-manager serves health endpoints (/healthz, /readyz) on
+    # port 8081, which upstream does not declare as a containerPort. The
+    # probes work regardless; declaring the port is not required.
+    - "liveness-port"
+    - "readiness-port"

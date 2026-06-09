@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@8.3.0
+  architect: giantswarm/architect@9.0.2
 
 workflows:
   build:
@@ -11,7 +11,6 @@ workflows:
       # so no go-build step is needed.
       - architect/push-to-registries:
           context: architect
-          multiarch: true
           name: push-to-registries
           image: giantswarm/kserve-controller
           platforms: "linux/amd64"
@@ -26,7 +25,6 @@ workflows:
       # from gsoci to Aliyun via the in-China galaxy-runner.
       - architect/push-to-registries:
           context: architect
-          multiarch: true
           name: push-to-registries-release
           image: giantswarm/kserve-controller
           force-public: true

@@ -33,6 +33,7 @@ Common labels
 */}}
 {{- define "kserve-resources.labels" -}}
 helm.sh/chart: {{ include "kserve-resources.chart" . }}
+application.giantswarm.io/team: {{ index .Chart.Annotations "application.giantswarm.io/team" | quote }}
 {{ include "kserve-resources.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
