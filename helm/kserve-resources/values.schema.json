@@ -1,0 +1,709 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "global": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Global values shared between all subcharts",
+            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key."
+        },
+        "kserve": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "agent": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "image": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "autoscaler": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "scaleDownStabilizationWindowSeconds": {
+                            "type": "string"
+                        },
+                        "scaleUpStabilizationWindowSeconds": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "certManager": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "controller": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "affinity": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                },
+                                "capabilities": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "drop": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "privileged": {
+                                    "type": "boolean"
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "type": "boolean"
+                                },
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "deploymentMode": {
+                            "type": "string"
+                        },
+                        "gateway": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "additionalIngressDomains": {
+                                    "type": "array"
+                                },
+                                "disableIngressCreation": {
+                                    "type": "boolean"
+                                },
+                                "disableIstioVirtualHost": {
+                                    "type": "boolean"
+                                },
+                                "domain": {
+                                    "type": "string"
+                                },
+                                "domainTemplate": {
+                                    "type": "string"
+                                },
+                                "ingressGateway": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "className": {
+                                            "type": "string"
+                                        },
+                                        "createGateway": {
+                                            "type": "boolean"
+                                        },
+                                        "enableGatewayApi": {
+                                            "type": "boolean"
+                                        },
+                                        "gateway": {
+                                            "type": "string"
+                                        },
+                                        "kserveGateway": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "localGateway": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "gateway": {
+                                            "type": "string"
+                                        },
+                                        "gatewayService": {
+                                            "type": "string"
+                                        },
+                                        "knativeGatewayService": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "pathTemplate": {
+                                    "type": "string"
+                                },
+                                "urlScheme": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "image": {
+                            "type": "string"
+                        },
+                        "imagePullSecrets": {
+                            "type": "array"
+                        },
+                        "knativeAddressableResolver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "labels": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "metricsBindAddress": {
+                            "type": "string"
+                        },
+                        "metricsBindPort": {
+                            "type": "string"
+                        },
+                        "nodeSelector": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "podAnnotations": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "podLabels": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "rbacProxy": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "resources": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "limits": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "requests": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "readOnlyRootFilesystem": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "rbacProxyImage": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "securityContext": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                },
+                                "seccompProfile": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "type": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "serviceAnnotations": {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "tag": {
+                            "type": "string"
+                        },
+                        "tolerations": {
+                            "type": "array"
+                        },
+                        "topologySpreadConstraints": {
+                            "type": "array"
+                        },
+                        "webhookServiceAnnotations": {
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "createSharedResources": {
+                    "type": "boolean"
+                },
+                "inferenceServiceConfig": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "inferenceservice": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "localmodel": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "agent": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "affinity": {
+                                    "type": "object",
+                                    "additionalProperties": false
+                                },
+                                "hostPath": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "nodeSelector": {
+                                    "type": "object",
+                                    "additionalProperties": false
+                                },
+                                "reconcilationFrequencyInSecs": {
+                                    "type": "integer"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsUser": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                },
+                                "tolerations": {
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "controller": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "image": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "defaultJobImage": {
+                            "type": "string"
+                        },
+                        "defaultJobTag": {
+                            "type": "string"
+                        },
+                        "disableVolumeManagement": {
+                            "type": "boolean"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "jobNamespace": {
+                            "type": "string"
+                        },
+                        "jobTTLSecondsAfterFinished": {
+                            "type": "integer"
+                        },
+                        "securityContext": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "fsGroup": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "metricsaggregator": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enableMetricAggregation": {
+                            "type": "string"
+                        },
+                        "enablePrometheusScraping": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "opentelemetryCollector": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "metricReceiverEndpoint": {
+                            "type": "string"
+                        },
+                        "metricScalerEndpoint": {
+                            "type": "string"
+                        },
+                        "resource": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "cpuLimit": {
+                                    "type": "string"
+                                },
+                                "cpuRequest": {
+                                    "type": "string"
+                                },
+                                "memoryLimit": {
+                                    "type": "string"
+                                },
+                                "memoryRequest": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "scrapeInterval": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "router": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "image": {
+                            "type": "string"
+                        },
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "imagePullSecrets": {
+                            "type": "array"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "autoMountServiceAccountToken": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "serviceClusterIPNone": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "servingruntime": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "art": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "defaultVersion": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "caBundleConfigMapName": {
+                            "type": "string"
+                        },
+                        "caBundleVolumeMountPath": {
+                            "type": "string"
+                        },
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                },
+                                "capabilities": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "drop": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "privileged": {
+                                    "type": "boolean"
+                                },
+                                "runAsNonRoot": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "cpuModelcar": {
+                            "type": "string"
+                        },
+                        "enableModelcar": {
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "string"
+                        },
+                        "memoryModelcar": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "s3": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "CABundle": {
+                                    "type": "string"
+                                },
+                                "CABundleConfigMap": {
+                                    "type": "string"
+                                },
+                                "accessKeyIdName": {
+                                    "type": "string"
+                                },
+                                "endpoint": {
+                                    "type": "string"
+                                },
+                                "region": {
+                                    "type": "string"
+                                },
+                                "secretAccessKeyName": {
+                                    "type": "string"
+                                },
+                                "useAnonymousCredential": {
+                                    "type": "string"
+                                },
+                                "useHttps": {
+                                    "type": "string"
+                                },
+                                "useVirtualBucket": {
+                                    "type": "string"
+                                },
+                                "verifySSL": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "storageSecretNameAnnotation": {
+                            "type": "string"
+                        },
+                        "storageSpecSecretName": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        },
+                        "uidModelcar": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "storagecontainer": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

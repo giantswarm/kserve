@@ -1,0 +1,768 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "global": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Global values shared between all subcharts",
+            "$comment": "Added automatically by 'helm schema' to allow this chart to be used as a Helm dependency, as the `additionalProperties` setting would otherwise collide with Helm's special 'global' values key."
+        },
+        "kserve": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "autoscaler": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "scaleDownStabilizationWindowSeconds": {
+                            "type": "string"
+                        },
+                        "scaleUpStabilizationWindowSeconds": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "inferenceservice": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "resources": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "llmisvcConfigs": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "opentelemetryCollector": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "metricReceiverEndpoint": {
+                            "type": "string"
+                        },
+                        "metricScalerEndpoint": {
+                            "type": "string"
+                        },
+                        "resource": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "cpuLimit": {
+                                    "type": "string"
+                                },
+                                "cpuRequest": {
+                                    "type": "string"
+                                },
+                                "memoryLimit": {
+                                    "type": "string"
+                                },
+                                "memoryRequest": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "scrapeInterval": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "autoMountServiceAccountToken": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "servingruntime": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "art": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "defaultVersion": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "huggingfaceserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "devShm": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "sizeLimit": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "hostIPC": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "lmcacheUseExperimental": {
+                                    "type": "string"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "huggingfaceserver_multinode": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "shm": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "sizeLimit": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "lgbserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "mlserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "modelClassPlaceholder": {
+                                    "type": "string"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "modelNamePlaceholder": {
+                            "type": "string"
+                        },
+                        "paddleserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "pmmlserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "predictiveserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "sklearnserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "tensorflow": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsUser": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "torchserve": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsUser": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "serviceEnvelopePlaceholder": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "tritonserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsUser": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "xgbserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
