@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.36] - 2026-06-21
+
 ### Changed
 
 
@@ -25,3 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial repository setup: Dockerfile, CI pipeline, vendored Helm charts for KServe v0.16.0.
+
+[Unreleased]: https://github.com/giantswarm/kserve/compare/v0.0.36...HEAD
+[0.0.36]: https://github.com/giantswarm/kserve/compare/v0.0.35...v0.0.36
