@@ -2,7 +2,7 @@
 
 Helm chart for deploying kserve resources
 
-![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.17.0](https://img.shields.io/badge/AppVersion-v0.17.0-informational?style=flat-square)
+![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.0](https://img.shields.io/badge/AppVersion-v0.20.0-informational?style=flat-square)
 
 ## Installing the Chart
 
@@ -16,7 +16,7 @@ $ helm install kserve-resources oci://ghcr.io/kserve/charts/kserve-resources --v
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| kserve.version | string | `"v0.17.0"` |  |
+| kserve.version | string | `"v0.20.0"` |  |
 | kserve.createSharedResources | bool | `true` |  |
 | kserve.inferenceServiceConfig.enabled | string | `""` |  |
 | kserve.certManager.enabled | string | `""` |  |
@@ -125,6 +125,7 @@ $ helm install kserve-resources oci://ghcr.io/kserve/charts/kserve-resources --v
 | kserve.controller.gateway.urlScheme | string | `"http"` |  |
 | kserve.controller.gateway.disableIstioVirtualHost | bool | `false` |  |
 | kserve.controller.gateway.disableIngressCreation | bool | `false` |  |
+| kserve.controller.gateway.disableHTTPRouteTimeout | bool | `false` |  |
 | kserve.controller.gateway.localGateway.gateway | string | `"knative-serving/knative-local-gateway"` |  |
 | kserve.controller.gateway.localGateway.gatewayService | string | `"knative-local-gateway.istio-system.svc.cluster.local"` |  |
 | kserve.controller.gateway.localGateway.knativeGatewayService | string | `""` |  |
@@ -139,6 +140,7 @@ $ helm install kserve-resources oci://ghcr.io/kserve/charts/kserve-resources --v
 | kserve.controller.affinity | object | `{}` |  |
 | kserve.controller.image | string | `"kserve/kserve-controller"` |  |
 | kserve.controller.tag | string | `""` |  |
+| kserve.controller.imagePullPolicy | string | `"Always"` |  |
 | kserve.controller.imagePullSecrets | list | `[]` |  |
 | kserve.controller.resources.limits.cpu | string | `"100m"` |  |
 | kserve.controller.resources.limits.memory | string | `"300Mi"` |  |

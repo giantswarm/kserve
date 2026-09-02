@@ -2,7 +2,7 @@ annotations:
   application.giantswarm.io/team: bumblebee
   category: AI/Machine Learning
 apiVersion: v2
-appVersion: v0.17.0
+appVersion: v0.20.0
 description: KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference
   Configs
 home: https://kserve.github.io/website/

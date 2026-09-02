@@ -1,5 +1,5 @@
 kserve:
-  version: v0.17.0
+  version: v0.20.0
   llmisvcConfigs:
     enabled: false
   servingruntime:
@@ -12,7 +12,7 @@ kserve:
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
       securityContext:
-        runAsUser: 1000  # User is not defined in the Dockerfile, so we need to set it here to run as non-root
+        runAsUser: 1000 # User is not defined in the Dockerfile, so we need to set it here to run as non-root
         allowPrivilegeEscalation: false
         privileged: false
         runAsNonRoot: true
@@ -98,7 +98,7 @@ kserve:
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
       securityContext:
-        runAsUser: 1000  # https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/customization_guide/deploy.html#run-as-a-non-root-user
+        runAsUser: 1000 # https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/customization_guide/deploy.html#run-as-a-non-root-user
         allowPrivilegeEscalation: false
         privileged: false
         runAsNonRoot: true
@@ -157,6 +157,19 @@ kserve:
         capabilities:
           drop:
             - ALL
+    autogluonserver:
+      disabled: false
+      image: kserve/autogluonserver
+      tag: ""
+      imagePullSecrets: []
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
     torchserve:
       disabled: false
       image: pytorch/torchserve-kfs
@@ -165,13 +178,31 @@ kserve:
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
       securityContext:
-        runAsUser: 1000  # User ID is not defined in the Dockerfile, so we need to set it here to run as non-root
+        runAsUser: 1000 # User ID is not defined in the Dockerfile, so we need to set it here to run as non-root
         allowPrivilegeEscalation: false
         privileged: false
         runAsNonRoot: true
         capabilities:
           drop:
             - ALL
+    vllmserver:
+      disabled: false
+      image: vllm/vllm-openai
+      tag: latest
+      lmcacheUseExperimental: "True"
+      imagePullSecrets: []
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        capabilities:
+          drop:
+            - ALL
+      devShm:
+        enabled: false
+        sizeLimit: ""
+      hostIPC:
+        enabled: false
     art:
       image: kserve/art-explainer
       defaultVersion: ""
