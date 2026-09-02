@@ -1,0 +1,14 @@
+---
+# kube-linter configuration for the kserve-llmisvc-resources chart.
+#
+# These resources are vendored upstream KServe llmisvc controller manifests.
+# The exclusions below cover checks that are false positives or benign for
+# these manifests. Each exclusion is scoped and justified.
+checks:
+  exclude:
+    # The llmisvc controller-manager serves health endpoints (/healthz,
+    # /readyz) on port 8081, which upstream does not declare as a
+    # containerPort. The probes work regardless; declaring the port is not
+    # required.
+    - "liveness-port"
+    - "readiness-port"

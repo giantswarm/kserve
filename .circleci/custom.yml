@@ -3,14 +3,62 @@
 # .circleci/workflows.yml at pipeline runtime (yq `*+`: maps merge, job lists
 # append). devctl never touches this file.
 #
-# What this file carries beyond the golden pipeline: the three OCI-only Helm
-# charts this repo publishes. The generator's single-chart app-catalog pipeline
-# (one chart named after the repo, pushed to the app catalog with ATS tests)
-# does not fit -- this repo ships three charts with non-repo names straight to
-# the OCI registry (push_to_oci_registry, push_to_appcatalog: false) and no ATS.
-# The `app` flavour is therefore dropped in team-bumblebee.yaml so the generator
-# emits no chart jobs, and the charts live here verbatim.
+# What this file carries beyond the golden pipeline:
+#   - the five OCI-only Helm charts this repo publishes. The generator's
+#     single-chart app-catalog pipeline (one chart named after the repo, pushed
+#     to the app catalog with ATS tests) does not fit -- this repo ships five
+#     charts with non-repo names straight to the OCI registry
+#     (push_to_oci_registry, push_to_appcatalog: false) and no ATS. The `app`
+#     flavour is therefore dropped in team-bumblebee.yaml so the generator
+#     emits no chart jobs, and the charts live here verbatim.
+#   - the second image build (Dockerfile.llmisvc -> llmisvc-controller): the
+#     generated image pipeline covers exactly one root Dockerfile (the classic
+#     kserve controller), so the llmisvc controller's branch/tag/china jobs are
+#     mirrored here with the same shape.
+#   - the retag job that also publishes the llmisvc controller image under its
+#     KSERVE_VERSION tag, which is what the kserve-llmisvc-resources chart's
+#     default values resolve to.
 version: 2.1
+
+jobs:
+  # Retag gsoci.azurecr.io/giantswarm/llmisvc-controller:<release> as
+  # :<KSERVE_VERSION> (read from Dockerfile.llmisvc). The vendored
+  # kserve-llmisvc-resources chart defaults the controller tag to
+  # `kserve.version` (the upstream KServe version), so the default install
+  # needs that tag present on gsoci. Re-releases at the same KSERVE_VERSION
+  # overwrite the tag with a newer build of the same upstream source; the
+  # repo-versioned tags stay immutable for pinning.
+  retag-llmisvc-kserve-version:
+    docker:
+      - image: gsoci.azurecr.io/giantswarm/skopeo:v1.22.2
+    resource_class: small
+    shell: /bin/bash
+    steps:
+      - checkout
+      - run:
+          name: Login to gsoci.azurecr.io
+          command: |
+            set -euo pipefail
+            skopeo login \
+              --username "${ACR_GSOCI_USERNAME}" \
+              --password "${ACR_GSOCI_PASSWORD}" \
+              gsoci.azurecr.io
+      - run:
+          name: Retag llmisvc-controller release as KSERVE_VERSION
+          command: |
+            set -euo pipefail
+
+            KSERVE_VERSION=$(sed -n 's/^ARG KSERVE_VERSION=//p' Dockerfile.llmisvc | head -n1)
+            if [ -z "${KSERVE_VERSION}" ]; then
+              echo "ERROR: could not read KSERVE_VERSION from Dockerfile.llmisvc"
+              exit 1
+            fi
+
+            SRC="docker://gsoci.azurecr.io/giantswarm/llmisvc-controller:${CIRCLE_TAG#v}"
+            DEST="docker://gsoci.azurecr.io/giantswarm/llmisvc-controller:${KSERVE_VERSION}"
+
+            echo "Retagging ${SRC} -> ${DEST}"
+            skopeo copy --all --preserve-digests --retry-times 5 "${SRC}" "${DEST}"
 
 workflows:
   build:
@@ -68,3 +116,92 @@ workflows:
           branches:
             ignore:
               - main
+
+    # Chart: kserve-llmisvc-crd (LLMInferenceService / LLMInferenceServiceConfig CRDs)
+    - architect/push-to-app-catalog:
+        context: architect
+        name: build-kserve-llmisvc-crd-chart
+        app_catalog: giantswarm-catalog
+        app_catalog_test: giantswarm-test-catalog
+        chart: kserve-llmisvc-crd
+        push_to_appcatalog: false
+        push_to_oci_registry: true
+        explicit_allow_chart_name_mismatch: true
+        persist_chart_archive: true
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore:
+              - main
+
+    # Chart: kserve-llmisvc-resources (llmisvc controller + GIE CRDs)
+    - architect/push-to-app-catalog:
+        context: architect
+        name: build-kserve-llmisvc-resources-chart
+        app_catalog: giantswarm-catalog
+        app_catalog_test: giantswarm-test-catalog
+        chart: kserve-llmisvc-resources
+        push_to_appcatalog: false
+        push_to_oci_registry: true
+        explicit_allow_chart_name_mismatch: true
+        persist_chart_archive: true
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore:
+              - main
+
+    # Branches: validate the llmisvc controller image build and push a dev tag
+    # (same shape as the generated push-to-registries job for the root
+    # Dockerfile; platforms pinned to amd64 to keep branch builds fast).
+    - architect/push-to-registries:
+        context: architect
+        name: push-llmisvc-to-registries
+        dockerfile: Dockerfile.llmisvc
+        image: giantswarm/llmisvc-controller
+        platforms: linux/amd64
+        filters:
+          branches:
+            ignore:
+            - main
+
+    # Tag builds: push the multi-arch llmisvc controller image to gsoci +
+    # gsociprivate. Aliyun is handled by the sync-china-registry job below.
+    - architect/push-to-registries:
+        context: architect
+        name: push-llmisvc-to-registries-release
+        dockerfile: Dockerfile.llmisvc
+        image: giantswarm/llmisvc-controller
+        split-china-push: true
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore: /.*/
+
+    # Mirror gsoci -> Aliyun for the llmisvc controller image.
+    - architect/sync-china-registry:
+        context: architect
+        name: sync-china-registry-llmisvc
+        image: giantswarm/llmisvc-controller
+        requires:
+        - push-llmisvc-to-registries-release
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore: /.*/
+
+    # Also publish the release image under its KSERVE_VERSION tag (the
+    # kserve-llmisvc-resources chart's default).
+    - retag-llmisvc-kserve-version:
+        context: architect
+        requires:
+        - push-llmisvc-to-registries-release
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore: /.*/
