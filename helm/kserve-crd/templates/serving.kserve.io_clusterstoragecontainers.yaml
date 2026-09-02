@@ -7,5 +7,11 @@
   {{- end -}}
 {{- end -}}
 {{- if $render }}
-{{ .Files.Get "files/serving.kserve.io_clusterstoragecontainers.yaml" }}
+{{- $doc := .Files.Get "files/serving.kserve.io_clusterstoragecontainers.yaml" }}
+{{- if .Values.crd.keep }}
+{{- /* Giant Swarm: keep the CRD on uninstall; the annotation is injected into
+       the vendored document next to the controller-gen marker. */}}
+{{- $doc = replace "controller-gen.kubebuilder.io/version: v0.19.0" "controller-gen.kubebuilder.io/version: v0.19.0\n    helm.sh/resource-policy: keep" $doc }}
+{{- end }}
+{{ $doc }}
 {{- end }}

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `kserve-crd` and `kserve-llmisvc-crd`: every CRD carries `helm.sh/resource-policy: keep` (value `crd.keep`, default `true`), so `helm uninstall` -- or turning the chart off as a dependency of an umbrella chart -- leaves the CRDs and every InferenceService, ServingRuntime and LLMInferenceService on the cluster. Removing them becomes a deliberate `kubectl delete crd`.
+
+### Fixed
+
+- `kserve-llmisvc-crd`: the conversion webhook of the `LLMInferenceService` and `LLMInferenceServiceConfig` CRDs and their `cert-manager.io/inject-ca-from` annotation follow the release namespace instead of the hardcoded `kserve`, like `kserve-llmisvc-resources` already does. Install the CRD chart into the namespace the llmisvc controller runs in.
+
 ## [0.0.36] - 2026-06-21
 
 ### Changed
