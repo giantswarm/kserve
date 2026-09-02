@@ -1,37 +1,72 @@
 # kserve
 
-Giant Swarm build of the [KServe](https://github.com/kserve/kserve) controller. Produces:
+Giant Swarm build of the [KServe](https://github.com/kserve/kserve) controllers. Produces:
 
-- **Container image**: `gsoci.azurecr.io/giantswarm/kserve-controller` (multi-arch: amd64 + arm64)
-- **Helm charts** (OCI): `kserve-resources`, `kserve-crd`, and `kserve-runtime-configs` in the `giantswarm-catalog`
+- **Container images** (multi-arch: amd64 + arm64):
+  - `gsoci.azurecr.io/giantswarm/kserve-controller` -- the classic KServe controller (`cmd/manager`)
+  - `gsoci.azurecr.io/giantswarm/llmisvc-controller` -- the LLMInferenceService controller (`cmd/llmisvc`)
+- **Helm charts** (OCI, `gsoci.azurecr.io/charts/giantswarm/<chart>`): `kserve-resources`, `kserve-crd`,
+  `kserve-runtime-configs`, `kserve-llmisvc-crd`, and `kserve-llmisvc-resources`
 
 ## Upstream version
 
 Currently pinned to **v0.20.0**. The version is set in:
 
-- `Dockerfile` (`KSERVE_VERSION` build arg -- tracked by Renovate)
-- `Makefile` (`KSERVE_VERSION` variable -- tracked by Renovate)
-- `helm/*/Chart.yaml` (vendored from upstream, updated via `make sync-charts`)
+- `Dockerfile` and `Dockerfile.llmisvc` (`KSERVE_VERSION` build arg -- tracked by Renovate)
+- `helm/*/Chart.yaml` and `helm/*/values.yaml` (`appVersion` / `kserve.version`, vendored from upstream)
 
 ## Updating to a new upstream version
 
-Renovate opens PRs when a new KServe release appears on GitHub. After merging:
+Renovate opens PRs when a new KServe release appears on GitHub (bumping the
+`KSERVE_VERSION` build args). After merging:
 
-1. Run `make sync-charts` to re-vendor the Helm charts at the new version.
-2. Verify the Go version in the `Dockerfile` matches upstream's `go.mod`.
-3. Commit, push, and tag.
+1. Re-vendor the Helm charts by hand from the upstream tag's `charts/` tree
+   (the charts are byte-copies of upstream plus a small set of deliberate
+   Giant Swarm overlays -- Chart.yaml metadata, team label in `_helpers.tpl`,
+   the gsoci default image in `kserve-llmisvc-resources/values.yaml`, and the
+   generated schema files).
+2. Verify the Go version in the Dockerfiles matches upstream's `go.mod`.
+3. Run `pre-commit run -a` until clean (regenerates schemas and chart READMEs).
+4. Commit, push, and tag.
 
-## Chart restructuring (v0.17.0+)
+## Charts
 
-Starting with v0.17.0, upstream split the single `kserve` chart into three:
+Starting with v0.17.0, upstream split the single `kserve` chart; since v0.20.0
+the LLMInferenceService (llmisvc) control plane ships as its own pair of charts:
 
 | Chart | Purpose |
 |---|---|
-| `kserve-resources` | Controller deployment, RBAC, webhooks, inferenceservice-config |
-| `kserve-crd` | CRD definitions |
-| `kserve-runtime-configs` | ClusterServingRuntimes and LLM inference configs |
+| `kserve-resources` | Classic controller deployment, RBAC, webhooks, inferenceservice-config |
+| `kserve-crd` | CRDs for the classic control plane (InferenceService etc.) |
+| `kserve-runtime-configs` | ClusterServingRuntimes and llmisvc config presets |
+| `kserve-llmisvc-crd` | `LLMInferenceService` / `LLMInferenceServiceConfig` CRDs |
+| `kserve-llmisvc-resources` | llmisvc controller deployment, RBAC, webhooks, GIE CRDs |
 
 Consumers that previously used `kserve` need to reference `kserve-resources` instead.
+
+## LLMInferenceService (llmisvc) install order
+
+The llmisvc control plane is independent of the classic controller. Install:
+
+1. **Gateway API CRDs** (standard channel) -- prerequisite, not shipped here:
+   `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml`
+   (KServe v0.20.0 builds against Gateway API v1.5.1)
+2. `kserve-llmisvc-crd` -- the `LLMInferenceService` / `LLMInferenceServiceConfig` CRDs.
+3. `kserve-llmisvc-resources` -- the llmisvc controller. By default this also
+   installs the Gateway API Inference Extension CRDs (`InferencePool` etc.)
+   embedded in the chart; set `kserve.llmisvc.createGIECRDs: false` if those
+   CRDs are managed elsewhere. Like `kserve-resources`, the chart also creates
+   the shared resources (`inferenceservice-config` ConfigMap, self-signed
+   cert-manager Issuer, default ClusterStorageContainer); when installing it
+   alongside `kserve-resources` in the same namespace, set
+   `kserve.createSharedResources: false` on one of the two releases.
+4. `kserve-runtime-configs` with `kserve.llmisvcConfigs.enabled: true` -- the
+   well-known `LLMInferenceServiceConfig` presets. The images the presets pin
+   are mirrored/built by [giantswarm/llm-d](https://github.com/giantswarm/llm-d).
+
+The controller image defaults to `gsoci.azurecr.io/giantswarm/llmisvc-controller`
+at the pinned `kserve.version` tag, which the release pipeline publishes
+alongside the repo-versioned tags.
 
 ## Local build
 
