@@ -134,6 +134,9 @@
                                 "additionalIngressDomains": {
                                     "type": "array"
                                 },
+                                "disableHTTPRouteTimeout": {
+                                    "type": "boolean"
+                                },
                                 "disableIngressCreation": {
                                     "type": "boolean"
                                 },
@@ -191,6 +194,9 @@
                             }
                         },
                         "image": {
+                            "type": "string"
+                        },
+                        "imagePullPolicy": {
                             "type": "string"
                         },
                         "imagePullSecrets": {

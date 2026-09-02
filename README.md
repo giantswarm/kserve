@@ -7,7 +7,7 @@ Giant Swarm build of the [KServe](https://github.com/kserve/kserve) controller. 
 
 ## Upstream version
 
-Currently pinned to **v0.17.0**. The version is set in:
+Currently pinned to **v0.20.0**. The version is set in:
 
 - `Dockerfile` (`KSERVE_VERSION` build arg -- tracked by Renovate)
 - `Makefile` (`KSERVE_VERSION` variable -- tracked by Renovate)

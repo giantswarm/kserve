@@ -1,6 +1,6 @@
 # kserve-runtime-configs
 
-![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.17.0](https://img.shields.io/badge/AppVersion-v0.17.0-informational?style=flat-square)
+![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.0](https://img.shields.io/badge/AppVersion-v0.20.0-informational?style=flat-square)
 
 KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference Configs
 
@@ -28,7 +28,7 @@ $ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| kserve.version | string | `"v0.17.0"` |  |
+| kserve.version | string | `"v0.20.0"` |  |
 | kserve.llmisvcConfigs.enabled | bool | `false` |  |
 | kserve.servingruntime.enabled | bool | `false` |  |
 | kserve.servingruntime.modelNamePlaceholder | string | `"{{.Name}}"` |  |
@@ -137,6 +137,15 @@ $ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime
 | kserve.servingruntime.lgbserver.securityContext.privileged | bool | `false` |  |
 | kserve.servingruntime.lgbserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.lgbserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| kserve.servingruntime.autogluonserver.disabled | bool | `false` |  |
+| kserve.servingruntime.autogluonserver.image | string | `"kserve/autogluonserver"` |  |
+| kserve.servingruntime.autogluonserver.tag | string | `""` |  |
+| kserve.servingruntime.autogluonserver.imagePullSecrets | list | `[]` |  |
+| kserve.servingruntime.autogluonserver.imagePullPolicy | string | `"IfNotPresent"` |  |
+| kserve.servingruntime.autogluonserver.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| kserve.servingruntime.autogluonserver.securityContext.privileged | bool | `false` |  |
+| kserve.servingruntime.autogluonserver.securityContext.runAsNonRoot | bool | `true` |  |
+| kserve.servingruntime.autogluonserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.torchserve.disabled | bool | `false` |  |
 | kserve.servingruntime.torchserve.image | string | `"pytorch/torchserve-kfs"` |  |
 | kserve.servingruntime.torchserve.tag | string | `"0.9.0"` |  |
@@ -148,6 +157,18 @@ $ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime
 | kserve.servingruntime.torchserve.securityContext.privileged | bool | `false` |  |
 | kserve.servingruntime.torchserve.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.torchserve.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| kserve.servingruntime.vllmserver.disabled | bool | `false` |  |
+| kserve.servingruntime.vllmserver.image | string | `"vllm/vllm-openai"` |  |
+| kserve.servingruntime.vllmserver.tag | string | `"latest"` |  |
+| kserve.servingruntime.vllmserver.lmcacheUseExperimental | string | `"True"` |  |
+| kserve.servingruntime.vllmserver.imagePullSecrets | list | `[]` |  |
+| kserve.servingruntime.vllmserver.imagePullPolicy | string | `"IfNotPresent"` |  |
+| kserve.servingruntime.vllmserver.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| kserve.servingruntime.vllmserver.securityContext.privileged | bool | `false` |  |
+| kserve.servingruntime.vllmserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| kserve.servingruntime.vllmserver.devShm.enabled | bool | `false` |  |
+| kserve.servingruntime.vllmserver.devShm.sizeLimit | string | `""` |  |
+| kserve.servingruntime.vllmserver.hostIPC.enabled | bool | `false` |  |
 | kserve.servingruntime.art.image | string | `"kserve/art-explainer"` |  |
 | kserve.servingruntime.art.defaultVersion | string | `""` |  |
 | kserve.servingruntime.art.imagePullSecrets | list | `[]` |  |

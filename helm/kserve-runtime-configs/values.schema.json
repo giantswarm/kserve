@@ -167,6 +167,54 @@
                                 }
                             }
                         },
+                        "autogluonserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
+                                        },
+                                        "runAsNonRoot": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -735,6 +783,75 @@
                                         },
                                         "runAsUser": {
                                             "type": "integer"
+                                        }
+                                    }
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "vllmserver": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "devShm": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "sizeLimit": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "disabled": {
+                                    "type": "boolean"
+                                },
+                                "hostIPC": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "imagePullPolicy": {
+                                    "type": "string"
+                                },
+                                "imagePullSecrets": {
+                                    "type": "array"
+                                },
+                                "lmcacheUseExperimental": {
+                                    "type": "string"
+                                },
+                                "securityContext": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "allowPrivilegeEscalation": {
+                                            "type": "boolean"
+                                        },
+                                        "capabilities": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "drop": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "privileged": {
+                                            "type": "boolean"
                                         }
                                     }
                                 },
