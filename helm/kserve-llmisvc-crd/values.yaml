@@ -1,1 +1,7 @@
-{}
+# Giant Swarm addition (not in the upstream chart).
+crd:
+  # Annotate every CRD with helm.sh/resource-policy: keep, so `helm uninstall`
+  # (or turning the chart off as an umbrella dependency) leaves the CRDs and
+  # with them every custom resource on the cluster. Removing the CRDs is then a
+  # deliberate `kubectl delete crd`.
+  keep: true

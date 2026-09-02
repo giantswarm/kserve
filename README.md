@@ -68,6 +68,26 @@ The controller image defaults to `gsoci.azurecr.io/giantswarm/llmisvc-controller
 at the pinned `kserve.version` tag, which the release pipeline publishes
 alongside the repo-versioned tags.
 
+## Giant Swarm overlays on the vendored charts
+
+The charts are byte copies of upstream `charts/<name>` except for these
+deliberate changes. Re-apply them after a re-vendor:
+
+- `Chart.yaml` of every chart: Giant Swarm annotations, icon, `version: "[[ .Version ]]"`.
+- `_helpers.tpl`: the `application.giantswarm.io/team` label (the whole file in
+  `kserve-crd` and `kserve-llmisvc-crd`).
+- `kserve-crd`, `kserve-llmisvc-crd`: `crd.keep` (default `true`) adds
+  `helm.sh/resource-policy: keep` to every CRD (the `ClusterStorageContainer`
+  CRD gets it injected into the document loaded from `files/`).
+- `kserve-llmisvc-crd`: the conversion-webhook service namespace and the
+  `cert-manager.io/inject-ca-from` annotation render `.Release.Namespace`
+  instead of the hardcoded `kserve`.
+- `kserve-resources`: Renovate-pinned `rbacProxyImage`;
+  `kserve-llmisvc-resources`: the `gsoci.azurecr.io/giantswarm/llmisvc-controller`
+  default image.
+- Giant Swarm-only files: `.schema.yaml`, `values.schema.json`,
+  `zz_generated.app-platform.values.yaml`, `.kube-linter.yaml`.
+
 ## Local build
 
 ```bash
