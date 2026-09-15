@@ -1,3 +1,11 @@
 {{- if .Values.kserve.llmisvcConfigs.enabled }}
-{{ .Files.Get "files/llmisvcconfigs/resources.yaml" }}
+{{- /*
+Giant Swarm overlay: the presets are upstream's file verbatim. At render time every
+`ghcr.io/llm-d/` image is rewritten to `kserve.llmisvcConfigs.imageRegistry` (the
+digest-identical mirror set giantswarm/llm-d keeps on gsoci by default) and the
+hardcoded `namespace: kserve` follows the release namespace.
+*/}}
+{{- $registry := required "kserve.llmisvcConfigs.imageRegistry must not be empty" .Values.kserve.llmisvcConfigs.imageRegistry }}
+{{- $content := .Files.Get "files/llmisvcconfigs/resources.yaml" | replace "ghcr.io/llm-d/" (printf "%s/" (trimSuffix "/" $registry)) }}
+{{ include "kserve-common.replaceNamespace" (list $content .Release.Namespace) }}
 {{- end }}

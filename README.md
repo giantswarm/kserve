@@ -61,8 +61,14 @@ The llmisvc control plane is independent of the classic controller. Install:
    alongside `kserve-resources` in the same namespace, set
    `kserve.createSharedResources: false` on one of the two releases.
 4. `kserve-runtime-configs` with `kserve.llmisvcConfigs.enabled: true` -- the
-   well-known `LLMInferenceServiceConfig` presets. The images the presets pin
-   are mirrored/built by [giantswarm/llm-d](https://github.com/giantswarm/llm-d).
+   well-known `LLMInferenceServiceConfig` presets, rendered into the release
+   namespace. Their `ghcr.io/llm-d/` images are rewritten at render time to
+   `kserve.llmisvcConfigs.imageRegistry`, by default the digest-identical
+   mirror set [giantswarm/llm-d](https://github.com/giantswarm/llm-d) keeps on
+   `gsoci.azurecr.io/giantswarm/` at the same tags; `ghcr.io/llm-d/` renders
+   upstream's images. The agent-platform chart consumes exactly this as its
+   `kserve-runtime-configs` component (`llmisvcConfigs` on, `servingruntime`
+   off, no registry value).
 
 The controller image defaults to `gsoci.azurecr.io/giantswarm/llmisvc-controller`
 at the pinned `kserve.version` tag, which the release pipeline publishes
@@ -82,6 +88,11 @@ deliberate changes. Re-apply them after a re-vendor:
 - `kserve-llmisvc-crd`: the conversion-webhook service namespace and the
   `cert-manager.io/inject-ca-from` annotation render `.Release.Namespace`
   instead of the hardcoded `kserve`.
+- `kserve-runtime-configs`: the llmisvc presets' `ghcr.io/llm-d/` images are
+  rewritten to `kserve.llmisvcConfigs.imageRegistry` (default
+  `gsoci.azurecr.io/giantswarm/`) and their hardcoded `namespace: kserve`
+  follows `.Release.Namespace` (`kserve-common.replaceNamespace`); the file
+  under `files/` stays upstream's verbatim.
 - `kserve-resources`: Renovate-pinned `rbacProxyImage`;
   `kserve-llmisvc-resources`: the `gsoci.azurecr.io/giantswarm/llmisvc-controller`
   default image.

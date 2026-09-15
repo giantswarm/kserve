@@ -14,6 +14,24 @@ To install the chart, run the following:
 $ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime-configs --set kserve.servingruntime.enabled=true --set kserve.llmisvcConfigs.enabled=true --version {{ template "chart.version" . }}
 ```
 
+## LLMInferenceServiceConfig presets
+
+`kserve.llmisvcConfigs.enabled: true` ships KServe's well-known `LLMInferenceServiceConfig`
+presets (`files/llmisvcconfigs/resources.yaml`, upstream's file verbatim) into the release
+namespace -- the llmisvc controller looks a config up in the `LLMInferenceService`'s namespace and
+then in its own. Every `LLMInferenceService` fails at config lookup without them.
+
+At render time every `ghcr.io/llm-d/` image the presets pin is rewritten to
+`kserve.llmisvcConfigs.imageRegistry`. The default, `gsoci.azurecr.io/giantswarm/`, is the mirror
+set [giantswarm/llm-d](https://github.com/giantswarm/llm-d) keeps digest-identical to upstream at
+the same tags (`llm-d-cuda`, `llm-d-router-endpoint-picker`, `llm-d-router-disagg-sidecar`,
+`llm-d-uds-tokenizer`, the two latency predictors); set it to `ghcr.io/llm-d/` to render
+upstream's images. The tags are the presets', never a value.
+
+The [agent-platform](https://github.com/giantswarm/agent-platform) chart consumes this chart as its
+`kserve-runtime-configs` component with `kserve.llmisvcConfigs.enabled: true` and
+`kserve.servingruntime.enabled: false`, passing no registry value.
+
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.sourcesSection" . }}
