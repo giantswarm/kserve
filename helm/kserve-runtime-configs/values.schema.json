@@ -102,7 +102,12 @@
                     "additionalProperties": false,
                     "properties": {
                         "enabled": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`)."
+                        },
+                        "imageRegistry": {
+                            "type": "string",
+                            "description": "Registry prefix the presets' `ghcr.io/llm-d/` images are rewritten to at render time. The default is the digest-identical mirror set giantswarm/llm-d keeps on gsoci at the same tags; set `ghcr.io/llm-d/` to render upstream's images."
                         }
                     }
                 },

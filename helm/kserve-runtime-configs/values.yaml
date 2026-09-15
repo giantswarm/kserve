@@ -1,7 +1,10 @@
 kserve:
   version: v0.20.0
   llmisvcConfigs:
+    # -- Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`).
     enabled: false
+    # -- Registry prefix the presets' `ghcr.io/llm-d/` images are rewritten to at render time. The default is the digest-identical mirror set giantswarm/llm-d keeps on gsoci at the same tags; set `ghcr.io/llm-d/` to render upstream's images.
+    imageRegistry: gsoci.azurecr.io/giantswarm/
   servingruntime:
     enabled: false
     modelNamePlaceholder: "{{.Name}}"
