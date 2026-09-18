@@ -100,7 +100,7 @@ kserve:
     tritonserver:
       disabled: false
       image: nvcr.io/nvidia/tritonserver
-      tag: 23.05-py3
+      tag: 23.12-py3
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
       securityContext:
