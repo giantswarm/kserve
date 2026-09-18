@@ -66,9 +66,14 @@ The llmisvc control plane is independent of the classic controller. Install:
    `kserve.llmisvcConfigs.imageRegistry`, by default the digest-identical
    mirror set [giantswarm/llm-d](https://github.com/giantswarm/llm-d) keeps on
    `gsoci.azurecr.io/giantswarm/` at the same tags; `ghcr.io/llm-d/` renders
-   upstream's images. The agent-platform chart consumes exactly this as its
-   `kserve-runtime-configs` component (`llmisvcConfigs` on, `servingruntime`
-   off, no registry value).
+   upstream's images. `kserve.llmisvcConfigs.images.<preset>.<container>`
+   then replaces the image of one container of one preset (`main` for the
+   runtime, `llm-d-routing-sidecar` for the decode presets' sidecar) -- for
+   GPU nodes that need another build of the same runtime, such as an arm64
+   vLLM on unified-memory Blackwell nodes; the chart README has the precedence
+   and the entrypoint an override image must serve. The agent-platform chart
+   consumes exactly this as its `kserve-runtime-configs` component
+   (`llmisvcConfigs` on, `servingruntime` off, no registry value).
 
 The controller image defaults to `gsoci.azurecr.io/giantswarm/llmisvc-controller`
 at the pinned `kserve.version` tag, which the release pipeline publishes
@@ -90,9 +95,13 @@ deliberate changes. Re-apply them after a re-vendor:
   instead of the hardcoded `kserve`.
 - `kserve-runtime-configs`: the llmisvc presets' `ghcr.io/llm-d/` images are
   rewritten to `kserve.llmisvcConfigs.imageRegistry` (default
-  `gsoci.azurecr.io/giantswarm/`) and their hardcoded `namespace: kserve`
-  follows `.Release.Namespace` (`kserve-common.replaceNamespace`); the file
-  under `files/` stays upstream's verbatim.
+  `gsoci.azurecr.io/giantswarm/`), a container named in
+  `kserve.llmisvcConfigs.images.<preset>.<container>` gets that image, and
+  their hardcoded `namespace: kserve` follows `.Release.Namespace`
+  (`kserve-common.replaceNamespace`); the file under `files/` stays upstream's
+  verbatim, a preset without an override renders byte for byte. The
+  helm-unittest suites under `helm/*/tests/` run with `make helm-test` (the
+  `chart-test` CircleCI job).
 - `kserve-resources`: Renovate-pinned `rbacProxyImage`;
   `kserve-llmisvc-resources`: the `gsoci.azurecr.io/giantswarm/llmisvc-controller`
   default image.

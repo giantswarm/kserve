@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `kserve-runtime-configs`: `kserve.llmisvcConfigs.images.<preset>.<container>` replaces the image of one container of one well-known `LLMInferenceServiceConfig` preset after the registry rewrite -- `main` for the runtime, `llm-d-routing-sidecar` for the decode presets' sidecar -- and every other preset renders unchanged; the render fails for a preset or container the file does not have. An installation whose GPU nodes need another build of the same runtime (arm64 vLLM on unified-memory Blackwell nodes) names it once per preset instead of overriding `spec.template` in every preset. The chart README documents the precedence and the entrypoint an override image must serve. `make helm-test` and the `chart-test` CircleCI job run the chart's helm-unittest suites.
 - `kserve-crd` and `kserve-llmisvc-crd`: every CRD carries `helm.sh/resource-policy: keep` (value `crd.keep`, default `true`), so `helm uninstall` -- or turning the chart off as a dependency of an umbrella chart -- leaves the CRDs and every InferenceService, ServingRuntime and LLMInferenceService on the cluster. Removing them becomes a deliberate `kubectl delete crd`.
 
 ### Fixed

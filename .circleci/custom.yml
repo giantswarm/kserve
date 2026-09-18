@@ -18,9 +18,32 @@
 #   - the retag job that also publishes the llmisvc controller image under its
 #     KSERVE_VERSION tag, which is what the kserve-llmisvc-resources chart's
 #     default values resolve to.
+#   - chart-test: helm lint plus the helm-unittest suites under helm/*/tests
+#     (the llmisvc preset image overrides of kserve-runtime-configs). The
+#     unittest plugin is not in the architect images, so the job runs in a
+#     plain container with a pinned Helm 3, the Helm the charts are built with.
 version: 2.1
 
 jobs:
+  chart-test:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    environment:
+      HELM_VERSION: v3.17.3
+    steps:
+      - checkout
+      - run:
+          name: Install helm
+          command: |
+            set -euxo pipefail
+            curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
+            sudo install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm
+            helm version --short
+      - run:
+          name: Run chart tests
+          command: make helm-test
+
   # Retag gsoci.azurecr.io/giantswarm/llmisvc-controller:<release> as
   # :<KSERVE_VERSION> (read from Dockerfile.llmisvc). The vendored
   # kserve-llmisvc-resources chart defaults the controller tag to
@@ -63,6 +86,13 @@ jobs:
 workflows:
   build:
     jobs:
+    # Independent of the image and chart builds: a chart-only PR gets the
+    # signal at once. Same tag filter as the build jobs.
+    - chart-test:
+        filters:
+          tags:
+            only: /^v.*/
+
     # Chart: kserve-resources (controller + config)
     - architect/push-to-app-catalog:
         context: architect

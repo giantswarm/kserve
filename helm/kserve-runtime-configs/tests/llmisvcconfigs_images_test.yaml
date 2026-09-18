@@ -1,0 +1,179 @@
+# kserve.llmisvcConfigs.images.<preset>.<container> replaces one container's image in one preset,
+# after the registry rewrite. Run with `make helm-test` (the chart is staged with a real version
+# first; architect fills the `[[ .Version ]]` placeholder only at build time).
+suite: llmisvc preset image overrides
+templates:
+  - templates/llmisvcconfigs/resources.yaml
+tests:
+  - it: rewrites every llm-d image to the registry and nothing else without an override
+    set:
+      kserve.llmisvcConfigs.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 10
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.template.initContainers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.9.0
+      - notMatchRegexRaw:
+          pattern: ghcr\.io/llm-d/
+
+  - it: replaces the main image of the named preset only
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-template:
+          main: gsoci.azurecr.io/giantswarm/vllm-b12x:2026-09-18
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/vllm-b12x:2026-09-18
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].name
+          value: main
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        equal:
+          path: spec.worker.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        equal:
+          path: spec.prefill.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+
+  - it: replaces both main containers of a data-parallel preset
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-worker-data-parallel:
+          main: example.com/vllm:arm64
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        equal:
+          path: spec.template.containers[0].image
+          value: example.com/vllm:arm64
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        equal:
+          path: spec.worker.containers[0].image
+          value: example.com/vllm:arm64
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+
+  - it: replaces the routing sidecar and the runtime of a decode preset independently
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-decode-template:
+          main: example.com/vllm:arm64
+          llm-d-routing-sidecar: example.com/pd-sidecar:v0.9.0
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.template.containers[0].image
+          value: example.com/vllm:arm64
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.template.initContainers[0].image
+          value: example.com/pd-sidecar:v0.9.0
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-worker-data-parallel
+        equal:
+          path: spec.template.initContainers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.9.0
+
+  - it: applies the override after a custom registry rewrite
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.imageRegistry: ghcr.io/llm-d/
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-scheduler:
+          tokenizer: example.com/tokenizer:1
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-scheduler
+        equal:
+          path: spec.router.scheduler.template.containers[1].image
+          value: example.com/tokenizer:1
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-scheduler
+        equal:
+          path: spec.router.scheduler.template.containers[0].image
+          value: ghcr.io/llm-d/llm-d-router-endpoint-picker:v0.9.0
+
+  - it: fails for a preset the file does not have
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-typo:
+          main: example.com/vllm:arm64
+    asserts:
+      - failedTemplate:
+          errorPattern: 'kserve\.llmisvcConfigs\.images\.kserve-config-llm-typo: no such preset \(the presets are: kserve-config-llm-decode-template, .*kserve-config-llm-worker-data-parallel\)'
+
+  - it: fails for a container the preset does not have
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-template:
+          sidecar: example.com/pd-sidecar:v0.9.0
+    asserts:
+      - failedTemplate:
+          errorPattern: 'kserve\.llmisvcConfigs\.images\.kserve-config-llm-template\.sidecar: preset kserve-config-llm-template has no container "sidecar" \(it has: main\)'
+
+  - it: fails for a value that is not an image reference
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-template:
+          main: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: 'kserve\.llmisvcConfigs\.images\.kserve-config-llm-template\.main: "" is not an image reference'
+
+  - it: renders no preset when disabled, whatever the overrides say
+    set:
+      kserve.llmisvcConfigs.enabled: false
+      kserve.llmisvcConfigs.images:
+        kserve-config-llm-typo:
+          main: example.com/vllm:arm64
+    asserts:
+      - hasDocuments:
+          count: 0

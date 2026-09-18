@@ -32,6 +32,50 @@ The [agent-platform](https://github.com/giantswarm/agent-platform) chart consume
 `kserve-runtime-configs` component with `kserve.llmisvcConfigs.enabled: true` and
 `kserve.servingruntime.enabled: false`, passing no registry value.
 
+### Per-preset image override
+
+`kserve.llmisvcConfigs.images.<preset>.<container>` replaces the image of one container of one
+preset, after the registry rewrite; every other preset renders as upstream ships it. `<preset>` is
+the preset's `metadata.name`, `<container>` the container's name inside it: `main` is the runtime
+container of every preset (vLLM in the worker presets, the endpoint picker in
+`kserve-config-llm-scheduler`), `llm-d-routing-sidecar` the routing sidecar the two decode presets
+run as an init container, `tokenizer`, `training-server` and `prediction-server` the scheduler's
+helpers. A data-parallel preset runs `main` twice, as leader and as worker; both get the override.
+The render fails for a preset or container the file does not have.
+
+The case it exists for: GPU nodes that need another build of the same runtime -- arm64
+unified-memory Blackwell nodes need an arm64 vLLM build in place of `llm-d-cuda` -- name it once per
+preset instead of overriding `spec.template` in every preset that runs on them:
+
+```yaml
+kserve:
+  llmisvcConfigs:
+    enabled: true
+    images:
+      kserve-config-llm-template:
+        main: gsoci.azurecr.io/giantswarm/vllm-b12x:2026-09-18
+      kserve-config-llm-worker-data-parallel:
+        main: gsoci.azurecr.io/giantswarm/vllm-b12x:2026-09-18
+```
+
+**Precedence.** Three layers, each over the previous one: the registry rewrite (`imageRegistry`)
+changes where every `ghcr.io/llm-d/` image is pulled from; the per-preset image (`images`) changes
+which image a named container of a named preset runs; the `LLMInferenceService`'s own spec, which
+KServe merges over the well-known configs the service refers to, wins over both -- a preset's own
+`spec.template` (what model-manager copies into the service verbatim) stays the per-preset
+exception, the override is for an installation's hardware.
+
+**What a `main` override must provide.** The preset keeps its command: the worker presets run
+`/bin/bash -c '<script>' -- <args>`, where the script probes `vllm --version`, picks the flags that
+version supports (`--disable-access-log-for-endpoints`, `--shutdown-timeout`, `--kv-transfer-config`)
+with `grep`, `awk` and `sort -V`, and ends in `eval "exec vllm serve /mnt/models --served-model-name …
+--port … $@"`; the data-parallel presets add `--api-server-count` and the `--data-parallel-*` flags.
+An override image therefore needs `/bin/bash`, GNU coreutils and awk, a `vllm` on `PATH` whose
+`serve` accepts those flags, the model under `/mnt/models`, `HF_HUB_CACHE=/models`, and `/health`
+on the preset's serving port, and it runs under the preset's non-root security context. An
+`llm-d-routing-sidecar` override must ship `/app/pd-sidecar` with the flags of the
+`llm-d-router-disagg-sidecar` release the preset pins.
+
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.sourcesSection" . }}
