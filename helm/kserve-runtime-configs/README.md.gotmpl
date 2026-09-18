@@ -11,7 +11,7 @@
 To install the chart, run the following:
 
 ```console
-$ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime-configs --set kserve.servingruntime.enabled=true --set kserve.llmisvcConfigs.enabled=true --version {{ template "chart.version" . }}
+$ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime-configs --set kserve.llmisvcConfigs.enabled=true --version {{ template "chart.version" . }}
 ```
 
 ## LLMInferenceServiceConfig presets
@@ -75,6 +75,16 @@ An override image therefore needs `/bin/bash`, GNU coreutils and awk, a `vllm` o
 on the preset's serving port, and it runs under the preset's non-root security context. An
 `llm-d-routing-sidecar` override must ship `/app/pd-sidecar` with the flags of the
 `llm-d-router-disagg-sidecar` release the preset pins.
+
+## Classic ServingRuntimes
+
+The Giant Swarm serving path is llm-d only: models are `LLMInferenceService`s composed from the
+presets above. The classic `ClusterServingRuntime`s upstream ships (`files/runtimes`: tensorflow,
+mlserver, sklearn, xgboost, huggingface, triton, pmml, predictive, paddle, lightgbm, autogluon,
+torchserve, vllm) stay in the chart but carry no image: every `kserve.servingruntime.<runtime>.image`
+is empty, so the chart references nothing outside `gsoci.azurecr.io`. `kserve.servingruntime.enabled`
+defaults to `false`; with it on, a runtime renders only when its `image` is set (the huggingface
+multinode runtime follows `huggingfaceserver.image`), and rendering fails when no runtime has one.
 
 {{ template "chart.maintainersSection" . }}
 

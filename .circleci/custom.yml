@@ -15,13 +15,16 @@
 #     generated image pipeline covers exactly one root Dockerfile (the classic
 #     kserve controller), so the llmisvc controller's branch/tag/china jobs are
 #     mirrored here with the same shape.
-#   - the retag job that also publishes the llmisvc controller image under its
-#     KSERVE_VERSION tag, which is what the kserve-llmisvc-resources chart's
-#     default values resolve to.
+#   - the retag job that also publishes both controller images under their
+#     KSERVE_VERSION tag, which is what the kserve-resources and
+#     kserve-llmisvc-resources charts' default values resolve to.
 #   - chart-test: helm lint plus the helm-unittest suites under helm/*/tests
 #     (the llmisvc preset image overrides of kserve-runtime-configs). The
 #     unittest plugin is not in the architect images, so the job runs in a
 #     plain container with a pinned Helm 3, the Helm the charts are built with.
+#   - the check-image-registry job: every image default of every chart is a
+#     gsoci.azurecr.io reference (hack/check-image-registry.py); the five chart
+#     publish jobs require it.
 version: 2.1
 
 jobs:
@@ -44,14 +47,35 @@ jobs:
           name: Run chart tests
           command: make helm-test
 
-  # Retag gsoci.azurecr.io/giantswarm/llmisvc-controller:<release> as
-  # :<KSERVE_VERSION> (read from Dockerfile.llmisvc). The vendored
-  # kserve-llmisvc-resources chart defaults the controller tag to
-  # `kserve.version` (the upstream KServe version), so the default install
-  # needs that tag present on gsoci. Re-releases at the same KSERVE_VERSION
-  # overwrite the tag with a newer build of the same upstream source; the
-  # repo-versioned tags stay immutable for pinning.
-  retag-llmisvc-kserve-version:
+  # Every image default of every chart under helm/ is a gsoci.azurecr.io reference:
+  # renders each chart with its defaults (and its feature switches on) and fails
+  # on any image outside the registry, in the manifests and in values.yaml. The
+  # app-build-suite image ships helm and PyYAML, which the script needs.
+  check-image-registry:
+    docker:
+      - image: gsoci.azurecr.io/giantswarm/app-build-suite:2.3.0-circleci
+    resource_class: small
+    shell: /bin/bash
+    steps:
+      - checkout
+      - run:
+          name: Every chart image default comes from gsoci.azurecr.io
+          command: hack/check-image-registry.py
+
+  # Retag gsoci.azurecr.io/giantswarm/<image>:<release> as :<KSERVE_VERSION> (read
+  # from the image's Dockerfile). The vendored resources charts default the
+  # controller tag to `kserve.version` (the upstream KServe version), so the
+  # default install needs that tag present on gsoci. Re-releases at the same
+  # KSERVE_VERSION overwrite the tag with a newer build of the same upstream
+  # source; the repo-versioned tags stay immutable for pinning.
+  retag-kserve-version:
+    parameters:
+      image:
+        description: Image name under gsoci.azurecr.io/giantswarm/.
+        type: string
+      dockerfile:
+        description: Dockerfile whose KSERVE_VERSION build arg names the tag.
+        type: string
     docker:
       - image: gsoci.azurecr.io/giantswarm/skopeo:v1.22.2
     resource_class: small
@@ -67,18 +91,18 @@ jobs:
               --password "${ACR_GSOCI_PASSWORD}" \
               gsoci.azurecr.io
       - run:
-          name: Retag llmisvc-controller release as KSERVE_VERSION
+          name: Retag << parameters.image >> release as KSERVE_VERSION
           command: |
             set -euo pipefail
 
-            KSERVE_VERSION=$(sed -n 's/^ARG KSERVE_VERSION=//p' Dockerfile.llmisvc | head -n1)
+            KSERVE_VERSION=$(sed -n 's/^ARG KSERVE_VERSION=//p' "<< parameters.dockerfile >>" | head -n1)
             if [ -z "${KSERVE_VERSION}" ]; then
-              echo "ERROR: could not read KSERVE_VERSION from Dockerfile.llmisvc"
+              echo "ERROR: could not read KSERVE_VERSION from << parameters.dockerfile >>"
               exit 1
             fi
 
-            SRC="docker://gsoci.azurecr.io/giantswarm/llmisvc-controller:${CIRCLE_TAG#v}"
-            DEST="docker://gsoci.azurecr.io/giantswarm/llmisvc-controller:${KSERVE_VERSION}"
+            SRC="docker://gsoci.azurecr.io/giantswarm/<< parameters.image >>:${CIRCLE_TAG#v}"
+            DEST="docker://gsoci.azurecr.io/giantswarm/<< parameters.image >>:${KSERVE_VERSION}"
 
             echo "Retagging ${SRC} -> ${DEST}"
             skopeo copy --all --preserve-digests --retry-times 5 "${SRC}" "${DEST}"
@@ -89,6 +113,12 @@ workflows:
     # Independent of the image and chart builds: a chart-only PR gets the
     # signal at once. Same tag filter as the build jobs.
     - chart-test:
+        filters:
+          tags:
+            only: /^v.*/
+
+    # Every chart image default comes from gsoci.azurecr.io; gates the chart jobs.
+    - check-image-registry:
         filters:
           tags:
             only: /^v.*/
@@ -104,6 +134,8 @@ workflows:
         push_to_oci_registry: true
         explicit_allow_chart_name_mismatch: true
         persist_chart_archive: true
+        requires:
+          - check-image-registry
         filters:
           tags:
             only: /^v.*/
@@ -122,6 +154,8 @@ workflows:
         push_to_oci_registry: true
         explicit_allow_chart_name_mismatch: true
         persist_chart_archive: true
+        requires:
+          - check-image-registry
         filters:
           tags:
             only: /^v.*/
@@ -140,6 +174,8 @@ workflows:
         push_to_oci_registry: true
         explicit_allow_chart_name_mismatch: true
         persist_chart_archive: true
+        requires:
+          - check-image-registry
         filters:
           tags:
             only: /^v.*/
@@ -158,6 +194,8 @@ workflows:
         push_to_oci_registry: true
         explicit_allow_chart_name_mismatch: true
         persist_chart_archive: true
+        requires:
+          - check-image-registry
         filters:
           tags:
             only: /^v.*/
@@ -176,6 +214,8 @@ workflows:
         push_to_oci_registry: true
         explicit_allow_chart_name_mismatch: true
         persist_chart_archive: true
+        requires:
+          - check-image-registry
         filters:
           tags:
             only: /^v.*/
@@ -224,10 +264,25 @@ workflows:
           branches:
             ignore: /.*/
 
-    # Also publish the release image under its KSERVE_VERSION tag (the
-    # kserve-llmisvc-resources chart's default).
-    - retag-llmisvc-kserve-version:
+    # Also publish both release images under their KSERVE_VERSION tag (the
+    # kserve-resources and kserve-llmisvc-resources charts' defaults).
+    - retag-kserve-version:
+        name: retag-kserve-controller-kserve-version
         context: architect
+        image: kserve-controller
+        dockerfile: Dockerfile
+        requires:
+        - push-to-registries-release
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore: /.*/
+    - retag-kserve-version:
+        name: retag-llmisvc-controller-kserve-version
+        context: architect
+        image: llmisvc-controller
+        dockerfile: Dockerfile.llmisvc
         requires:
         - push-llmisvc-to-registries-release
         filters:
