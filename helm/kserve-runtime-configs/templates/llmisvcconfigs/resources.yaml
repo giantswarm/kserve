@@ -1,11 +1,32 @@
 {{- if .Values.kserve.llmisvcConfigs.enabled }}
 {{- /*
-Giant Swarm overlay: the presets are upstream's file verbatim. At render time every
-`ghcr.io/llm-d/` image is rewritten to `kserve.llmisvcConfigs.imageRegistry` (the
-digest-identical mirror set giantswarm/llm-d keeps on gsoci by default) and the
-hardcoded `namespace: kserve` follows the release namespace.
+Giant Swarm overlay: the presets are upstream's file verbatim. At render time, in this order:
+every `ghcr.io/llm-d/` image is rewritten to `kserve.llmisvcConfigs.imageRegistry` (the
+digest-identical mirror set giantswarm/llm-d keeps on gsoci by default); a container named in
+`kserve.llmisvcConfigs.images.<preset>.<container>` gets that image instead (every other preset
+stays as it is); the hardcoded `namespace: kserve` follows the release namespace. The file is
+handled document by document so a preset without an override renders byte for byte as upstream
+ships it.
 */}}
 {{- $registry := required "kserve.llmisvcConfigs.imageRegistry must not be empty" .Values.kserve.llmisvcConfigs.imageRegistry }}
+{{- $overrides := .Values.kserve.llmisvcConfigs.images | default dict }}
 {{- $content := .Files.Get "files/llmisvcconfigs/resources.yaml" | replace "ghcr.io/llm-d/" (printf "%s/" (trimSuffix "/" $registry)) }}
-{{ include "kserve-common.replaceNamespace" (list $content .Release.Namespace) }}
+{{- $documents := list }}
+{{- $presets := list }}
+{{- range $document := regexSplit "(?m)^---$" $content -1 }}
+  {{- if not (empty (trim $document)) }}
+    {{- $preset := (fromYaml $document).metadata.name }}
+    {{- $presets = append $presets $preset }}
+    {{- if hasKey $overrides $preset }}
+      {{- $document = include "kserve-runtime-configs.overridePresetImages" (list $document $preset (index $overrides $preset)) }}
+    {{- end }}
+  {{- end }}
+  {{- $documents = append $documents $document }}
+{{- end }}
+{{- range $preset, $_ := $overrides }}
+  {{- if not (has $preset $presets) }}
+    {{- fail (printf "kserve.llmisvcConfigs.images.%s: no such preset (the presets are: %s)" $preset (join ", " $presets)) }}
+  {{- end }}
+{{- end }}
+{{ include "kserve-common.replaceNamespace" (list (join "---" $documents) .Release.Namespace) }}
 {{- end }}
