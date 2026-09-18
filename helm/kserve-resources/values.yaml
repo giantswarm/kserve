@@ -8,17 +8,17 @@ kserve:
   storagecontainer:
     enabled: ''
   agent:
-    image: kserve/agent
+    image: gsoci.azurecr.io/giantswarm/agent
     tag: ''
   router:
-    image: kserve/router
+    image: gsoci.azurecr.io/giantswarm/router
     tag: ''
     imagePullPolicy: IfNotPresent
     imagePullSecrets: []
   service:
     serviceClusterIPNone: false
   storage:
-    image: kserve/storage-initializer
+    image: gsoci.azurecr.io/giantswarm/storage-initializer
     tag: ''
     resources:
       requests:
@@ -58,16 +58,16 @@ kserve:
     enablePrometheusScraping: 'false'
   servingruntime:
     art:
-      image: kserve/art-explainer
+      image: gsoci.azurecr.io/giantswarm/art-explainer
       defaultVersion: ''
   localmodel:
     enabled: false
     controller:
-      image: kserve/kserve-localmodel-controller
+      image: gsoci.azurecr.io/giantswarm/kserve-localmodel-controller
       tag: ''
     jobNamespace: kserve-localmodel-jobs
     jobTTLSecondsAfterFinished: 3600
-    defaultJobImage: kserve/storage-initializer
+    defaultJobImage: gsoci.azurecr.io/giantswarm/storage-initializer
     defaultJobTag: ''
     securityContext:
       fsGroup: 1000
@@ -77,7 +77,7 @@ kserve:
       affinity: {}
       tolerations: []
       hostPath: /mnt/models
-      image: kserve/kserve-localmodelnode-agent
+      image: gsoci.azurecr.io/giantswarm/kserve-localmodelnode-agent
       tag: ''
       reconcilationFrequencyInSecs: 60
       securityContext:
@@ -107,7 +107,7 @@ kserve:
     scaleDownStabilizationWindowSeconds: '300'
   controller:
     deploymentMode: Knative
-    rbacProxyImage: quay.io/brancz/kube-rbac-proxy:v0.22.1
+    rbacProxyImage: gsoci.azurecr.io/giantswarm/kube-rbac-proxy:v0.22.1
     rbacProxy:
       resources:
         limits:
@@ -167,7 +167,7 @@ kserve:
     tolerations: []
     topologySpreadConstraints: []
     affinity: {}
-    image: kserve/kserve-controller
+    image: gsoci.azurecr.io/giantswarm/kserve-controller
     tag: ''
     imagePullPolicy: Always
     imagePullSecrets: []

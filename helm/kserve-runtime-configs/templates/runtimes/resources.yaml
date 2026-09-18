@@ -1,4 +1,19 @@
 {{- if .Values.kserve.servingruntime.enabled }}
+{{- /*
+Giant Swarm overlay: the chart ships no third-party runtime image (values.yaml leaves
+every `kserve.servingruntime.<runtime>.image` empty). A runtime renders only when its
+image is set -- step 6 drops a merged resource whose container image is a bare ":<tag>"
+-- and the switch is an error when no runtime has one.
+*/ -}}
+{{- $configured := list }}
+{{- range $name, $runtime := .Values.kserve.servingruntime }}
+  {{- if and (kindIs "map" $runtime) (hasKey $runtime "disabled") (hasKey $runtime "image") (not (empty $runtime.image)) }}
+    {{- $configured = append $configured $name }}
+  {{- end }}
+{{- end }}
+{{- if not $configured }}
+  {{- fail "kserve.servingruntime.enabled is true but no kserve.servingruntime.<runtime>.image is set: this chart ships no third-party runtime image; a runtime renders only with an image" }}
+{{- end }}
 {{- /* 1. Load base resources file */ -}}
 {{- $baseContent := .Files.Get "files/runtimes/resources.yaml" -}}
 
@@ -43,10 +58,16 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* 6. Output all merged resources */ -}}
+{{- /* 6. Output all merged resources that have an image (Giant Swarm overlay, see above) */ -}}
 {{- range $name := keys $baseMap | sortAlpha }}
 {{- $resource := index $baseMap $name }}
+{{- $imageless := false }}
+{{- range $container := concat ($resource.spec.containers | default list) (dig "workerSpec" "containers" list $resource.spec) }}
+  {{- if hasPrefix ":" ($container.image | default "") }}{{- $imageless = true }}{{- end }}
+{{- end }}
+{{- if not $imageless }}
 ---
 {{ toYaml $resource }}
 {{ end -}}
+{{- end -}}
 {{- end }}

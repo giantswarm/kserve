@@ -9,11 +9,12 @@ kserve:
     # -- Per-preset image overrides, applied after the registry rewrite: `<preset name>: {<container name>: <image reference>}`. `main` is the runtime container of every preset, `llm-d-routing-sidecar` the routing sidecar of the decode presets; every other preset renders unchanged. See the README for the precedence and what an override image must provide.
     images: {}
   servingruntime:
+    # -- Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is.
     enabled: false
     modelNamePlaceholder: "{{.Name}}"
     tensorflow:
       disabled: false
-      image: tensorflow/serving
+      image: ""
       tag: 2.6.2
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -27,7 +28,7 @@ kserve:
             - ALL
     mlserver:
       disabled: false
-      image: docker.io/seldonio/mlserver
+      image: ""
       tag: 1.5.0
       modelClassPlaceholder: "{{.Labels.modelClass}}"
       imagePullSecrets: []
@@ -41,7 +42,7 @@ kserve:
             - ALL
     sklearnserver:
       disabled: false
-      image: kserve/sklearnserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -54,7 +55,7 @@ kserve:
             - ALL
     xgbserver:
       disabled: false
-      image: kserve/xgbserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -67,7 +68,7 @@ kserve:
             - ALL
     huggingfaceserver:
       disabled: false
-      image: kserve/huggingfaceserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -99,7 +100,7 @@ kserve:
         sizeLimit: "3Gi"
     tritonserver:
       disabled: false
-      image: nvcr.io/nvidia/tritonserver
+      image: ""
       tag: 23.05-py3
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -113,7 +114,7 @@ kserve:
             - ALL
     pmmlserver:
       disabled: false
-      image: kserve/pmmlserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -126,7 +127,7 @@ kserve:
             - ALL
     predictiveserver:
       disabled: false
-      image: kserve/predictiveserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -139,7 +140,7 @@ kserve:
             - ALL
     paddleserver:
       disabled: false
-      image: kserve/paddleserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -152,7 +153,7 @@ kserve:
             - ALL
     lgbserver:
       disabled: false
-      image: kserve/lgbserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -165,7 +166,7 @@ kserve:
             - ALL
     autogluonserver:
       disabled: false
-      image: kserve/autogluonserver
+      image: ""
       tag: ""
       imagePullSecrets: []
       imagePullPolicy: IfNotPresent
@@ -178,7 +179,7 @@ kserve:
             - ALL
     torchserve:
       disabled: false
-      image: pytorch/torchserve-kfs
+      image: ""
       tag: 0.9.0
       serviceEnvelopePlaceholder: "{{.Labels.serviceEnvelope}}"
       imagePullSecrets: []
@@ -193,7 +194,7 @@ kserve:
             - ALL
     vllmserver:
       disabled: false
-      image: vllm/vllm-openai
+      image: ""
       tag: latest
       lmcacheUseExperimental: "True"
       imagePullSecrets: []
@@ -210,7 +211,7 @@ kserve:
       hostIPC:
         enabled: false
     art:
-      image: kserve/art-explainer
+      image: gsoci.azurecr.io/giantswarm/art-explainer
       defaultVersion: ""
       imagePullSecrets: []
   security:

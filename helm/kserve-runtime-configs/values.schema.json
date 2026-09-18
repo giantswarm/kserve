@@ -231,7 +231,8 @@
                             }
                         },
                         "enabled": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is."
                         },
                         "huggingfaceserver": {
                             "type": "object",

@@ -11,7 +11,7 @@ KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference Configs
 To install the chart, run the following:
 
 ```console
-$ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime-configs --set kserve.servingruntime.enabled=true --set kserve.llmisvcConfigs.enabled=true --version [[ .Version ]]
+$ helm install kserve-runtime-configs oci://ghcr.io/kserve/charts/kserve-runtime-configs --set kserve.llmisvcConfigs.enabled=true --version [[ .Version ]]
 ```
 
 ## LLMInferenceServiceConfig presets
@@ -76,6 +76,16 @@ on the preset's serving port, and it runs under the preset's non-root security c
 `llm-d-routing-sidecar` override must ship `/app/pd-sidecar` with the flags of the
 `llm-d-router-disagg-sidecar` release the preset pins.
 
+## Classic ServingRuntimes
+
+The Giant Swarm serving path is llm-d only: models are `LLMInferenceService`s composed from the
+presets above. The classic `ClusterServingRuntime`s upstream ships (`files/runtimes`: tensorflow,
+mlserver, sklearn, xgboost, huggingface, triton, pmml, predictive, paddle, lightgbm, autogluon,
+torchserve, vllm) stay in the chart but carry no image: every `kserve.servingruntime.<runtime>.image`
+is empty, so the chart references nothing outside `gsoci.azurecr.io`. `kserve.servingruntime.enabled`
+defaults to `false`; with it on, a runtime renders only when its `image` is set (the huggingface
+multinode runtime follows `huggingfaceserver.image`), and rendering fails when no runtime has one.
+
 ## Maintainers
 
 | Name | Email | Url |
@@ -94,10 +104,10 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.llmisvcConfigs.enabled | bool | `false` | Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`). |
 | kserve.llmisvcConfigs.imageRegistry | string | `"gsoci.azurecr.io/giantswarm/"` | Registry prefix the presets' `ghcr.io/llm-d/` images are rewritten to at render time. The default is the digest-identical mirror set giantswarm/llm-d keeps on gsoci at the same tags; set `ghcr.io/llm-d/` to render upstream's images. |
 | kserve.llmisvcConfigs.images | object | `{}` | Per-preset image overrides, applied after the registry rewrite: `<preset name>: {<container name>: <image reference>}`. `main` is the runtime container of every preset, `llm-d-routing-sidecar` the routing sidecar of the decode presets; every other preset renders unchanged. See the README for the precedence and what an override image must provide. |
-| kserve.servingruntime.enabled | bool | `false` |  |
+| kserve.servingruntime.enabled | bool | `false` | Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is. |
 | kserve.servingruntime.modelNamePlaceholder | string | `"{{.Name}}"` |  |
 | kserve.servingruntime.tensorflow.disabled | bool | `false` |  |
-| kserve.servingruntime.tensorflow.image | string | `"tensorflow/serving"` |  |
+| kserve.servingruntime.tensorflow.image | string | `""` |  |
 | kserve.servingruntime.tensorflow.tag | string | `"2.6.2"` |  |
 | kserve.servingruntime.tensorflow.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.tensorflow.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -107,7 +117,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.tensorflow.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.tensorflow.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.mlserver.disabled | bool | `false` |  |
-| kserve.servingruntime.mlserver.image | string | `"docker.io/seldonio/mlserver"` |  |
+| kserve.servingruntime.mlserver.image | string | `""` |  |
 | kserve.servingruntime.mlserver.tag | string | `"1.5.0"` |  |
 | kserve.servingruntime.mlserver.modelClassPlaceholder | string | `"{{.Labels.modelClass}}"` |  |
 | kserve.servingruntime.mlserver.imagePullSecrets | list | `[]` |  |
@@ -117,7 +127,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.mlserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.mlserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.sklearnserver.disabled | bool | `false` |  |
-| kserve.servingruntime.sklearnserver.image | string | `"kserve/sklearnserver"` |  |
+| kserve.servingruntime.sklearnserver.image | string | `""` |  |
 | kserve.servingruntime.sklearnserver.tag | string | `""` |  |
 | kserve.servingruntime.sklearnserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.sklearnserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -126,7 +136,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.sklearnserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.sklearnserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.xgbserver.disabled | bool | `false` |  |
-| kserve.servingruntime.xgbserver.image | string | `"kserve/xgbserver"` |  |
+| kserve.servingruntime.xgbserver.image | string | `""` |  |
 | kserve.servingruntime.xgbserver.tag | string | `""` |  |
 | kserve.servingruntime.xgbserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.xgbserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -135,7 +145,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.xgbserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.xgbserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.huggingfaceserver.disabled | bool | `false` |  |
-| kserve.servingruntime.huggingfaceserver.image | string | `"kserve/huggingfaceserver"` |  |
+| kserve.servingruntime.huggingfaceserver.image | string | `""` |  |
 | kserve.servingruntime.huggingfaceserver.tag | string | `""` |  |
 | kserve.servingruntime.huggingfaceserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.huggingfaceserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -156,7 +166,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.huggingfaceserver_multinode.shm.enabled | bool | `true` |  |
 | kserve.servingruntime.huggingfaceserver_multinode.shm.sizeLimit | string | `"3Gi"` |  |
 | kserve.servingruntime.tritonserver.disabled | bool | `false` |  |
-| kserve.servingruntime.tritonserver.image | string | `"nvcr.io/nvidia/tritonserver"` |  |
+| kserve.servingruntime.tritonserver.image | string | `""` |  |
 | kserve.servingruntime.tritonserver.tag | string | `"23.05-py3"` |  |
 | kserve.servingruntime.tritonserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.tritonserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -166,7 +176,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.tritonserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.tritonserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.pmmlserver.disabled | bool | `false` |  |
-| kserve.servingruntime.pmmlserver.image | string | `"kserve/pmmlserver"` |  |
+| kserve.servingruntime.pmmlserver.image | string | `""` |  |
 | kserve.servingruntime.pmmlserver.tag | string | `""` |  |
 | kserve.servingruntime.pmmlserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.pmmlserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -175,7 +185,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.pmmlserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.pmmlserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.predictiveserver.disabled | bool | `false` |  |
-| kserve.servingruntime.predictiveserver.image | string | `"kserve/predictiveserver"` |  |
+| kserve.servingruntime.predictiveserver.image | string | `""` |  |
 | kserve.servingruntime.predictiveserver.tag | string | `""` |  |
 | kserve.servingruntime.predictiveserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.predictiveserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -184,7 +194,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.predictiveserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.predictiveserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.paddleserver.disabled | bool | `false` |  |
-| kserve.servingruntime.paddleserver.image | string | `"kserve/paddleserver"` |  |
+| kserve.servingruntime.paddleserver.image | string | `""` |  |
 | kserve.servingruntime.paddleserver.tag | string | `""` |  |
 | kserve.servingruntime.paddleserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.paddleserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -193,7 +203,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.paddleserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.paddleserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.lgbserver.disabled | bool | `false` |  |
-| kserve.servingruntime.lgbserver.image | string | `"kserve/lgbserver"` |  |
+| kserve.servingruntime.lgbserver.image | string | `""` |  |
 | kserve.servingruntime.lgbserver.tag | string | `""` |  |
 | kserve.servingruntime.lgbserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.lgbserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -202,7 +212,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.lgbserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.lgbserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.autogluonserver.disabled | bool | `false` |  |
-| kserve.servingruntime.autogluonserver.image | string | `"kserve/autogluonserver"` |  |
+| kserve.servingruntime.autogluonserver.image | string | `""` |  |
 | kserve.servingruntime.autogluonserver.tag | string | `""` |  |
 | kserve.servingruntime.autogluonserver.imagePullSecrets | list | `[]` |  |
 | kserve.servingruntime.autogluonserver.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -211,7 +221,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.autogluonserver.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.autogluonserver.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.torchserve.disabled | bool | `false` |  |
-| kserve.servingruntime.torchserve.image | string | `"pytorch/torchserve-kfs"` |  |
+| kserve.servingruntime.torchserve.image | string | `""` |  |
 | kserve.servingruntime.torchserve.tag | string | `"0.9.0"` |  |
 | kserve.servingruntime.torchserve.serviceEnvelopePlaceholder | string | `"{{.Labels.serviceEnvelope}}"` |  |
 | kserve.servingruntime.torchserve.imagePullSecrets | list | `[]` |  |
@@ -222,7 +232,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.torchserve.securityContext.runAsNonRoot | bool | `true` |  |
 | kserve.servingruntime.torchserve.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | kserve.servingruntime.vllmserver.disabled | bool | `false` |  |
-| kserve.servingruntime.vllmserver.image | string | `"vllm/vllm-openai"` |  |
+| kserve.servingruntime.vllmserver.image | string | `""` |  |
 | kserve.servingruntime.vllmserver.tag | string | `"latest"` |  |
 | kserve.servingruntime.vllmserver.lmcacheUseExperimental | string | `"True"` |  |
 | kserve.servingruntime.vllmserver.imagePullSecrets | list | `[]` |  |
@@ -233,7 +243,7 @@ on the preset's serving port, and it runs under the preset's non-root security c
 | kserve.servingruntime.vllmserver.devShm.enabled | bool | `false` |  |
 | kserve.servingruntime.vllmserver.devShm.sizeLimit | string | `""` |  |
 | kserve.servingruntime.vllmserver.hostIPC.enabled | bool | `false` |  |
-| kserve.servingruntime.art.image | string | `"kserve/art-explainer"` |  |
+| kserve.servingruntime.art.image | string | `"gsoci.azurecr.io/giantswarm/art-explainer"` |  |
 | kserve.servingruntime.art.defaultVersion | string | `""` |  |
 | kserve.servingruntime.art.imagePullSecrets | list | `[]` |  |
 | kserve.security.autoMountServiceAccountToken | bool | `true` |  |

@@ -23,3 +23,7 @@ helm-unittest: helm-plugin-unittest ## Lint and run the helm-unittest suites of 
 .PHONY: helm-plugin-unittest
 helm-plugin-unittest:
 	@helm plugin list | grep -q '^unittest' || helm plugin install https://github.com/helm-unittest/helm-unittest --version $(HELM_UNITTEST_VERSION)
+
+.PHONY: check-image-registry
+check-image-registry: ## Fail on any chart image default outside gsoci.azurecr.io (hack/check-image-registry.py).
+	hack/check-image-registry.py

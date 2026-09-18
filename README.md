@@ -23,10 +23,12 @@ Renovate opens PRs when a new KServe release appears on GitHub (bumping the
 1. Re-vendor the Helm charts by hand from the upstream tag's `charts/` tree
    (the charts are byte-copies of upstream plus a small set of deliberate
    Giant Swarm overlays -- Chart.yaml metadata, team label in `_helpers.tpl`,
-   the gsoci default image in `kserve-llmisvc-resources/values.yaml`, and the
-   generated schema files).
+   the gsoci image defaults in the resources charts' `values.yaml`, the
+   image-less classic runtimes, and the generated schema files; the full list
+   is under [Giant Swarm overlays](#giant-swarm-overlays-on-the-vendored-charts)).
 2. Verify the Go version in the Dockerfiles matches upstream's `go.mod`.
-3. Run `pre-commit run -a` until clean (regenerates schemas and chart READMEs).
+3. Run `pre-commit run -a` until clean (regenerates schemas and chart READMEs)
+   and `make check-image-registry` (every image default is a gsoci reference).
 4. Commit, push, and tag.
 
 ## Charts
@@ -75,9 +77,39 @@ The llmisvc control plane is independent of the classic controller. Install:
    consumes exactly this as its `kserve-runtime-configs` component
    (`llmisvcConfigs` on, `servingruntime` off, no registry value).
 
-The controller image defaults to `gsoci.azurecr.io/giantswarm/llmisvc-controller`
-at the pinned `kserve.version` tag, which the release pipeline publishes
-alongside the repo-versioned tags.
+The controller images default to `gsoci.azurecr.io/giantswarm/kserve-controller`
+and `gsoci.azurecr.io/giantswarm/llmisvc-controller` at the pinned
+`kserve.version` tag, which the release pipeline publishes alongside the
+repo-versioned tags.
+
+## Images
+
+Every image the charts reference by default is a `gsoci.azurecr.io/giantswarm/`
+reference; nothing is pulled from Docker Hub, quay.io or ghcr.io, so an
+installation that pulls from one registry overrides nothing and a Kyverno
+signature policy that trusts one Giant Swarm identity admits them all:
+
+- `kserve-controller` and `llmisvc-controller` are built here (multi-arch,
+  signed by the release pipeline).
+- The KServe images the controllers inject or run -- `agent`, `router`,
+  `storage-initializer`, `art-explainer`, `kserve-localmodel-controller`,
+  `kserve-localmodelnode-agent` -- and the controller's `kube-rbac-proxy`
+  sidecar are mirrored and signed by
+  [giantswarm/retagger](https://github.com/giantswarm/retagger) under their
+  upstream tags.
+- The llm-d images the `LLMInferenceServiceConfig` presets pin are mirrored by
+  [giantswarm/llm-d](https://github.com/giantswarm/llm-d)
+  (`kserve.llmisvcConfigs.imageRegistry`, see above).
+- The classic `ClusterServingRuntime`s of `kserve-runtime-configs` ship no
+  image: the Giant Swarm serving path is llm-d only. With
+  `kserve.servingruntime.enabled: true` a runtime renders only when its `image`
+  is set; rendering fails when none is.
+
+`make check-image-registry` (`hack/check-image-registry.py`, also the
+`check-image-registry` CircleCI job every chart publish requires) renders every
+chart with its defaults and its feature switches on and fails on any image
+reference outside `gsoci.azurecr.io` -- in the manifests, in the JSON blocks of
+the `inferenceservice-config` ConfigMap, and in `values.yaml`.
 
 ## Giant Swarm overlays on the vendored charts
 
@@ -102,9 +134,12 @@ deliberate changes. Re-apply them after a re-vendor:
   verbatim, a preset without an override renders byte for byte. The
   helm-unittest suites under `helm/*/tests/` run with `make helm-test` (the
   `chart-test` CircleCI job).
-- `kserve-resources`: Renovate-pinned `rbacProxyImage`;
-  `kserve-llmisvc-resources`: the `gsoci.azurecr.io/giantswarm/llmisvc-controller`
-  default image.
+- `kserve-resources`, `kserve-llmisvc-resources`: every image default in
+  `values.yaml` is a `gsoci.azurecr.io/giantswarm/` reference (see
+  [Images](#images)), the Renovate-pinned `rbacProxyImage` included.
+- `kserve-runtime-configs`: the classic runtimes' `image` values are empty and
+  `templates/runtimes/resources.yaml` renders only runtimes that have one
+  (failing when none has).
 - Giant Swarm-only files: `.schema.yaml`, `values.schema.json`,
   `zz_generated.app-platform.values.yaml`, `.kube-linter.yaml`.
 

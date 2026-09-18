@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `kserve-resources`, `kserve-llmisvc-resources`: every image default is a `gsoci.azurecr.io/giantswarm/` reference -- the KServe images the controllers inject or run (`agent`, `router`, `storage-initializer`, `art-explainer`, `kserve-localmodel-controller`, `kserve-localmodelnode-agent`) and the `kube-rbac-proxy` sidecar through their retagger mirrors, the classic controller like the llmisvc controller already was. Nothing is pulled from Docker Hub or quay.io.
+- `kserve-runtime-configs`: the classic `ClusterServingRuntime`s ship no third-party runtime image any more (every `kserve.servingruntime.<runtime>.image` is empty; `art.image` follows the mirror). With `kserve.servingruntime.enabled: true` a runtime renders only when its image is set, and rendering fails when no runtime has one. The Giant Swarm serving path is llm-d only; `enabled: false`, the default, renders as before.
+- The release pipeline publishes `kserve-controller` under the KServe version it builds (`v0.20.0`), as it already did for `llmisvc-controller`; that tag is what `kserve-resources` resolves to by default.
+
 ### Added
 
 - `kserve-runtime-configs`: `kserve.llmisvcConfigs.images.<preset>.<container>` replaces the image of one container of one well-known `LLMInferenceServiceConfig` preset after the registry rewrite -- `main` for the runtime, `llm-d-routing-sidecar` for the decode presets' sidecar -- and every other preset renders unchanged; the render fails for a preset or container the file does not have. An installation whose GPU nodes need another build of the same runtime (arm64 vLLM on unified-memory Blackwell nodes) names it once per preset instead of overriding `spec.template` in every preset. The chart README documents the precedence and the entrypoint an override image must serve. `make helm-test` and the `chart-test` CircleCI job run the chart's helm-unittest suites.
+- `hack/check-image-registry.py` (`make check-image-registry`; the `check-image-registry` CircleCI job every chart publish requires) renders every chart with its defaults and its feature switches on and fails on any image reference outside `gsoci.azurecr.io`, in the manifests, in the JSON blocks of the `inferenceservice-config` ConfigMap and in `values.yaml`.
 - `kserve-crd` and `kserve-llmisvc-crd`: every CRD carries `helm.sh/resource-policy: keep` (value `crd.keep`, default `true`), so `helm uninstall` -- or turning the chart off as a dependency of an umbrella chart -- leaves the CRDs and every InferenceService, ServingRuntime and LLMInferenceService on the cluster. Removing them becomes a deliberate `kubectl delete crd`.
 
 ### Fixed
