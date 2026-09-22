@@ -185,6 +185,7 @@ kserve:
       serviceMonitor:
         enabled: false
         interval: 60s
+        # @schema additionalProperties: {type: string}
         labels: {}
       serviceAccount:
         name: ''
