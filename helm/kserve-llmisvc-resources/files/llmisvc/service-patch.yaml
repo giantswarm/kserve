@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "llm-isvc-resources.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller
+    kserve.giantswarm.io/metrics: "true"
     control-plane: {{ include "llm-isvc-resources.deploymentName" . }}
     controller-tools.k8s.io: "1.0"
     {{- with .Values.commonLabels }}

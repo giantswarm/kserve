@@ -139,6 +139,8 @@ kserve:
       # outside the pod could scrape).
       metricsBindAddress: ''
       metricsBindPort: '8443'
+      # -- Serve metrics over HTTPS, and allow only callers that pass a TokenReview and a SubjectAccessReview for `get /metrics` (upstream default). `false` serves plain HTTP with no authentication. Also sets the ServiceMonitor scheme.
+      metricsSecure: true
       nodeSelector: {}
       tolerations: []
       topologySpreadConstraints: []
@@ -178,15 +180,16 @@ kserve:
         type: ClusterIP
         port: 8443
         targetPort: metrics
-      # The chart ships no ServiceMonitor at all today, so nothing scrapes the
-      # controller's metrics Service even where Prometheus Operator CRDs are
-      # served. Off by default: an installation that runs Prometheus Operator
-      # turns it on and sets its own tenant label under `labels`.
       serviceMonitor:
+        # -- Render a ServiceMonitor for the controller metrics Service. Requires the Prometheus Operator CRDs.
         enabled: false
         interval: 60s
         # @schema additionalProperties: {type: string}
+        # -- Extra ServiceMonitor labels, for example the tenant label that the scraper selects on.
         labels: {}
+        # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.rbac.v1.Subject
+        # -- RBAC subjects bound to the `<controller>-metrics-reader` ClusterRole when `metricsSecure` is true, for example the scraper's ServiceAccount. Empty renders the ClusterRole only.
+        metricsReaderSubjects: []
       serviceAccount:
         name: ''
       env: []

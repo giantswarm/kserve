@@ -90,6 +90,7 @@ spec:
         {{- end }}
         args:
         - "--metrics-addr={{ .Values.kserve.llmisvc.controller.metricsBindAddress }}:{{ .Values.kserve.llmisvc.controller.metricsBindPort }}"
+        - "--metrics-secure={{ .Values.kserve.llmisvc.controller.metricsSecure }}"
         - "--leader-elect"
         {{- with .Values.kserve.llmisvc.controller.extraArgs }}
         {{- toYaml . | nindent 8 }}

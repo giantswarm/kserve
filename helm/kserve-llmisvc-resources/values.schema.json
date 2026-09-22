@@ -1,5 +1,37 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+        "_definitions.json": {
+            "definitions": {
+                "io.k8s.api.rbac.v1.Subject": {
+                    "type": "object",
+                    "description": "Subject contains a reference to the object or user identities a role binding applies to.  This can either hold a direct API object reference, or a value for non-objects such as user and group names.",
+                    "required": [
+                        "kind",
+                        "name"
+                    ],
+                    "properties": {
+                        "apiGroup": {
+                            "type": "string",
+                            "description": "APIGroup holds the API group of the referenced subject. Defaults to \"\" for ServiceAccount subjects. Defaults to \"rbac.authorization.k8s.io\" for User and Group subjects."
+                        },
+                        "kind": {
+                            "type": "string",
+                            "description": "Kind of object being referenced. Values defined by this API group are \"User\", \"Group\", and \"ServiceAccount\". If the Authorizer does not recognized the kind value, the Authorizer should report an error."
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the object being referenced."
+                        },
+                        "namespace": {
+                            "type": "string",
+                            "description": "Namespace of the referenced object.  If the object kind is non-namespace, such as \"User\" or \"Group\", and this value is not empty the Authorizer should report an error."
+                        }
+                    }
+                }
+            }
+        }
+    },
     "type": "object",
     "additionalProperties": false,
     "properties": {
@@ -335,6 +367,10 @@
                                 "metricsBindPort": {
                                     "type": "string"
                                 },
+                                "metricsSecure": {
+                                    "type": "boolean",
+                                    "description": "Serve metrics over HTTPS, and allow only callers that pass a TokenReview and a SubjectAccessReview for `get /metrics` (upstream default). `false` serves plain HTTP with no authentication. Also sets the ServiceMonitor scheme."
+                                },
                                 "nodeSelector": {
                                     "type": "object",
                                     "additionalProperties": false
@@ -464,15 +500,24 @@
                                     "additionalProperties": false,
                                     "properties": {
                                         "enabled": {
-                                            "type": "boolean"
+                                            "type": "boolean",
+                                            "description": "Render a ServiceMonitor for the controller metrics Service. Requires the Prometheus Operator CRDs."
                                         },
                                         "interval": {
                                             "type": "string"
                                         },
                                         "labels": {
                                             "type": "object",
+                                            "description": "Extra ServiceMonitor labels, for example the tenant label that the scraper selects on.",
                                             "additionalProperties": {
                                                 "type": "string"
+                                            }
+                                        },
+                                        "metricsReaderSubjects": {
+                                            "type": "array",
+                                            "description": "RBAC subjects bound to the `<controller>-metrics-reader` ClusterRole when `metricsSecure` is true, for example the scraper's ServiceAccount. Empty renders the ClusterRole only.",
+                                            "items": {
+                                                "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.rbac.v1.Subject"
                                             }
                                         }
                                     }
