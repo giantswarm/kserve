@@ -123,8 +123,9 @@ $ helm install kserve-llmisvc-resources oci://ghcr.io/kserve/charts/kserve-llmis
 | kserve.llmisvc.controller.containerSecurityContext.runAsNonRoot | bool | `true` |  |
 | kserve.llmisvc.controller.containerSecurityContext.runAsUser | int | `1000` |  |
 | kserve.llmisvc.controller.containerSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
-| kserve.llmisvc.controller.metricsBindAddress | string | `"127.0.0.1"` |  |
+| kserve.llmisvc.controller.metricsBindAddress | string | `""` |  |
 | kserve.llmisvc.controller.metricsBindPort | string | `"8443"` |  |
+| kserve.llmisvc.controller.metricsSecure | bool | `true` | Serve metrics over HTTPS, and allow only callers that pass a TokenReview and a SubjectAccessReview for `get /metrics` (upstream default). `false` serves plain HTTP with no authentication. Also sets the ServiceMonitor scheme. |
 | kserve.llmisvc.controller.nodeSelector | object | `{}` |  |
 | kserve.llmisvc.controller.tolerations | list | `[]` |  |
 | kserve.llmisvc.controller.topologySpreadConstraints | list | `[]` |  |
@@ -154,6 +155,10 @@ $ helm install kserve-llmisvc-resources oci://ghcr.io/kserve/charts/kserve-llmis
 | kserve.llmisvc.controller.service.type | string | `"ClusterIP"` |  |
 | kserve.llmisvc.controller.service.port | int | `8443` |  |
 | kserve.llmisvc.controller.service.targetPort | string | `"metrics"` |  |
+| kserve.llmisvc.controller.serviceMonitor.enabled | bool | `false` | Render a ServiceMonitor for the controller metrics Service. Requires the Prometheus Operator CRDs. |
+| kserve.llmisvc.controller.serviceMonitor.interval | string | `"60s"` |  |
+| kserve.llmisvc.controller.serviceMonitor.labels | object | `{}` | Extra ServiceMonitor labels, for example the tenant label that the scraper selects on. |
+| kserve.llmisvc.controller.serviceMonitor.metricsReaderSubjects | list | `[]` | RBAC subjects bound to the `<controller>-metrics-reader` ClusterRole when `metricsSecure` is true, for example the scraper's ServiceAccount. Empty renders the ClusterRole only. |
 | kserve.llmisvc.controller.serviceAccount.name | string | `""` |  |
 | kserve.llmisvc.controller.env | list | `[]` |  |
 | kserve.llmisvc.controller.extraVolumes | list | `[]` |  |

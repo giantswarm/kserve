@@ -132,8 +132,15 @@ kserve:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
-      metricsBindAddress: 127.0.0.1
+      # Empty binds every interface (--metrics-addr=:8443). 127.0.0.1 (upstream's
+      # own default) makes the metrics endpoint unreachable from the Service and
+      # therefore from any ServiceMonitor -- the same class of gap the kagent
+      # controller had before kagent-dev/kagent#2886 (BindAddress that nothing
+      # outside the pod could scrape).
+      metricsBindAddress: ''
       metricsBindPort: '8443'
+      # -- Serve metrics over HTTPS, and allow only callers that pass a TokenReview and a SubjectAccessReview for `get /metrics` (upstream default). `false` serves plain HTTP with no authentication. Also sets the ServiceMonitor scheme.
+      metricsSecure: true
       nodeSelector: {}
       tolerations: []
       topologySpreadConstraints: []
@@ -173,6 +180,16 @@ kserve:
         type: ClusterIP
         port: 8443
         targetPort: metrics
+      serviceMonitor:
+        # -- Render a ServiceMonitor for the controller metrics Service. Requires the Prometheus Operator CRDs.
+        enabled: false
+        interval: 60s
+        # @schema additionalProperties: {type: string}
+        # -- Extra ServiceMonitor labels, for example the tenant label that the scraper selects on.
+        labels: {}
+        # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.rbac.v1.Subject
+        # -- RBAC subjects bound to the `<controller>-metrics-reader` ClusterRole when `metricsSecure` is true, for example the scraper's ServiceAccount. Empty renders the ClusterRole only.
+        metricsReaderSubjects: []
       serviceAccount:
         name: ''
       env: []
