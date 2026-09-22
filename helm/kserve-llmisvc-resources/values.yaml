@@ -132,7 +132,12 @@ kserve:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
-      metricsBindAddress: 127.0.0.1
+      # Empty binds every interface (--metrics-addr=:8443). 127.0.0.1 (upstream's
+      # own default) makes the metrics endpoint unreachable from the Service and
+      # therefore from any ServiceMonitor -- the same class of gap the kagent
+      # controller had before kagent-dev/kagent#2886 (BindAddress that nothing
+      # outside the pod could scrape).
+      metricsBindAddress: ''
       metricsBindPort: '8443'
       nodeSelector: {}
       tolerations: []
@@ -173,6 +178,14 @@ kserve:
         type: ClusterIP
         port: 8443
         targetPort: metrics
+      # The chart ships no ServiceMonitor at all today, so nothing scrapes the
+      # controller's metrics Service even where Prometheus Operator CRDs are
+      # served. Off by default: an installation that runs Prometheus Operator
+      # turns it on and sets its own tenant label under `labels`.
+      serviceMonitor:
+        enabled: false
+        interval: 60s
+        labels: {}
       serviceAccount:
         name: ''
       env: []

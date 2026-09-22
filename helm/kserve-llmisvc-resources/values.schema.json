@@ -459,6 +459,22 @@
                                     "type": "object",
                                     "additionalProperties": false
                                 },
+                                "serviceMonitor": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "interval": {
+                                            "type": "string"
+                                        },
+                                        "labels": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                },
                                 "strategy": {
                                     "type": "object",
                                     "additionalProperties": false,
