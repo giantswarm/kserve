@@ -77,7 +77,7 @@ jobs:
         description: Dockerfile whose KSERVE_VERSION build arg names the tag.
         type: string
     docker:
-      - image: gsoci.azurecr.io/giantswarm/skopeo:v1.22.2
+      - image: gsoci.azurecr.io/giantswarm/skopeo:v1.22.3
     resource_class: small
     shell: /bin/bash
     steps:
