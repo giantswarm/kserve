@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `kserve-llmisvc-resources`: the `helm.sh/chart` label is valid for any chart version ([giantswarm/kserve#91](https://github.com/giantswarm/kserve/issues/91)). Its helper cut `<name>-<version>` to 63 characters and trimmed a single trailing `-`, so a long branch-build or `<tag>+<digest>` version whose cut ended in `.`, `_` or a run like `--.` produced a value the API server refuses on every object that carries it; the helper now trims the whole run with `trimAll "-._"`. The same line is fixed in the unused helpers of `kserve-crd`, `kserve-llmisvc-crd`, `kserve-resources` and `kserve-runtime-configs`.
 - `kserve-llmisvc-crd`: the conversion webhook of the `LLMInferenceService` and `LLMInferenceServiceConfig` CRDs and their `cert-manager.io/inject-ca-from` annotation follow the release namespace instead of the hardcoded `kserve`, like `kserve-llmisvc-resources` already does. Install the CRD chart into the namespace the llmisvc controller runs in.
 
 ## [0.0.36] - 2026-06-21
