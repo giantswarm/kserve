@@ -53,7 +53,7 @@ jobs:
   # app-build-suite image ships helm and PyYAML, which the script needs.
   check-image-registry:
     docker:
-      - image: gsoci.azurecr.io/giantswarm/app-build-suite:2.4.1-circleci
+      - image: gsoci.azurecr.io/giantswarm/app-build-suite:2.5.0-circleci
     resource_class: small
     shell: /bin/bash
     steps:
