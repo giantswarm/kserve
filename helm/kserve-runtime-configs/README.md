@@ -76,6 +76,34 @@ on the preset's serving port, and it runs under the preset's non-root security c
 `llm-d-routing-sidecar` override must ship `/app/pd-sidecar` with the flags of the
 `llm-d-router-disagg-sidecar` release the preset pins.
 
+### Tracing preset
+
+The llmisvc controller has no OpenTelemetry code of its own; the data plane exports. For every
+`LLMInferenceService` whose spec carries `tracing` -- `tracing: {}` is enough -- the controller
+appends `kserve-config-llm-tracing` to the configs it merges and turns the merged `spec.tracing`
+into `--otlp-traces-endpoint`, `--collect-detailed-traces all` and the `OTEL_*` env of the vLLM
+`main` container (decode and prefill), and into `--tracing=true` plus the same env on the endpoint
+picker. A service without `tracing` exports nothing, whatever this preset says. Nobody lists the
+preset in `baseRefs`.
+
+Upstream's preset sends to `http://otel-collector:4317`, a Service that exists in no Giant Swarm
+cluster. `kserve.llmisvcConfigs.tracing` sets its `exporterEndpoint`, `sampler` and `samplerArg`;
+`podLabels` become the preset's `spec.labels`, which the controller copies onto the workload pod
+template, so the pods that export -- and only those -- carry, for instance, the tenant label an OTLP
+gateway routes a headerless export by. The exporters speak OTLP over gRPC and send no headers; the
+spec has no protocol or header field. An `LLMInferenceService`'s own `spec.tracing` keys win over the
+preset's. With no key set the preset renders as upstream ships it.
+
+```yaml
+kserve:
+  llmisvcConfigs:
+    enabled: true
+    tracing:
+      exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+      podLabels:
+        observability.giantswarm.io/tenant: giantswarm
+```
+
 ## Classic ServingRuntimes
 
 The Giant Swarm serving path is llm-d only: models are `LLMInferenceService`s composed from the
@@ -104,6 +132,10 @@ multinode runtime follows `huggingfaceserver.image`), and rendering fails when n
 | kserve.llmisvcConfigs.enabled | bool | `false` | Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`). |
 | kserve.llmisvcConfigs.imageRegistry | string | `"gsoci.azurecr.io/giantswarm/"` | Registry prefix the presets' `ghcr.io/llm-d/` images are rewritten to at render time. The default is the digest-identical mirror set giantswarm/llm-d keeps on gsoci at the same tags; set `ghcr.io/llm-d/` to render upstream's images. |
 | kserve.llmisvcConfigs.images | object | `{}` | Per-preset image overrides, applied after the registry rewrite: `<preset name>: {<container name>: <image reference>}`. `main` is the runtime container of every preset, `llm-d-routing-sidecar` the routing sidecar of the decode presets; every other preset renders unchanged. See the README for the precedence and what an override image must provide. |
+| kserve.llmisvcConfigs.tracing.exporterEndpoint | string | `""` | OTLP/gRPC endpoint the vLLM and endpoint-picker exporters send spans to (`spec.tracing.exporterEndpoint`); upstream's is `http://otel-collector:4317`. vLLM and the endpoint picker export over gRPC only. |
+| kserve.llmisvcConfigs.tracing.sampler | string | `""` | OpenTelemetry sampler (`spec.tracing.sampler`, `OTEL_TRACES_SAMPLER`); upstream's is `parentbased_traceidratio`. |
+| kserve.llmisvcConfigs.tracing.samplerArg | string | `""` | Sampler argument (`spec.tracing.samplerArg`, `OTEL_TRACES_SAMPLER_ARG`), a ratio between 0 and 1 for the ratio samplers; upstream's is `"0.05"`. |
+| kserve.llmisvcConfigs.tracing.podLabels | object | `{}` | Labels the preset adds to the pods of an `LLMInferenceService` with tracing on (`spec.labels`, which the controller copies onto the workload pod template), e.g. the label an OTLP gateway routes a headerless export by. Not the prefill or endpoint-picker pods. |
 | kserve.servingruntime.enabled | bool | `false` | Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is. |
 | kserve.servingruntime.modelNamePlaceholder | string | `"{{.Name}}"` |  |
 | kserve.servingruntime.tensorflow.disabled | bool | `false` |  |

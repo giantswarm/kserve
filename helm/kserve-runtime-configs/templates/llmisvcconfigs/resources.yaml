@@ -4,12 +4,14 @@ Giant Swarm overlay: the presets are upstream's file verbatim. At render time, i
 every `ghcr.io/llm-d/` image is rewritten to `kserve.llmisvcConfigs.imageRegistry` (the
 digest-identical mirror set giantswarm/llm-d keeps on gsoci by default); a container named in
 `kserve.llmisvcConfigs.images.<preset>.<container>` gets that image instead (every other preset
-stays as it is); the hardcoded `namespace: kserve` follows the release namespace. The file is
-handled document by document so a preset without an override renders byte for byte as upstream
-ships it.
+stays as it is); the tracing preset takes `kserve.llmisvcConfigs.tracing`; the hardcoded
+`namespace: kserve` follows the release namespace. The file is handled document by document so a
+preset without an override renders byte for byte as upstream ships it.
 */}}
 {{- $registry := required "kserve.llmisvcConfigs.imageRegistry must not be empty" .Values.kserve.llmisvcConfigs.imageRegistry }}
 {{- $overrides := .Values.kserve.llmisvcConfigs.images | default dict }}
+{{- $tracingPreset := "kserve-config-llm-tracing" }}
+{{- $tracing := include "kserve-runtime-configs.tracingOverride" .Values.kserve.llmisvcConfigs.tracing | fromJson }}
 {{- $content := .Files.Get "files/llmisvcconfigs/resources.yaml" | replace "ghcr.io/llm-d/" (printf "%s/" (trimSuffix "/" $registry)) }}
 {{- $documents := list }}
 {{- $presets := list }}
@@ -20,8 +22,14 @@ ships it.
     {{- if hasKey $overrides $preset }}
       {{- $document = include "kserve-runtime-configs.overridePresetImages" (list $document $preset (index $overrides $preset)) }}
     {{- end }}
+    {{- if and $tracing (eq $preset $tracingPreset) }}
+      {{- $document = include "kserve-runtime-configs.overrideTracing" (list $document $tracing) }}
+    {{- end }}
   {{- end }}
   {{- $documents = append $documents $document }}
+{{- end }}
+{{- if and $tracing (not (has $tracingPreset $presets)) }}
+  {{- fail (printf "kserve.llmisvcConfigs.tracing: no preset %s (the presets are: %s)" $tracingPreset (join ", " $presets)) }}
 {{- end }}
 {{- range $preset, $_ := $overrides }}
   {{- if not (has $preset $presets) }}
