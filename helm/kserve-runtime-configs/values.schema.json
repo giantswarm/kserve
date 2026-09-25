@@ -118,6 +118,42 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "tracing": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "exporterEndpoint": {
+                                    "type": "string",
+                                    "description": "OTLP/gRPC endpoint the vLLM and endpoint-picker exporters send spans to (`spec.tracing.exporterEndpoint`); upstream's is `http://otel-collector:4317`. vLLM and the endpoint picker export over gRPC only.",
+                                    "pattern": "^(https?://[^\\s\"'#]+)?$"
+                                },
+                                "podLabels": {
+                                    "type": "object",
+                                    "description": "Labels the preset adds to the pods of an `LLMInferenceService` with tracing on (`spec.labels`, which the controller copies onto the workload pod template), e.g. the label an OTLP gateway routes a headerless export by. Not the prefill or endpoint-picker pods.",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                },
+                                "sampler": {
+                                    "type": "string",
+                                    "description": "OpenTelemetry sampler (`spec.tracing.sampler`, `OTEL_TRACES_SAMPLER`); upstream's is `parentbased_traceidratio`.",
+                                    "enum": [
+                                        "",
+                                        "always_on",
+                                        "always_off",
+                                        "traceidratio",
+                                        "parentbased_always_on",
+                                        "parentbased_always_off",
+                                        "parentbased_traceidratio"
+                                    ]
+                                },
+                                "samplerArg": {
+                                    "type": "string",
+                                    "description": "Sampler argument (`spec.tracing.samplerArg`, `OTEL_TRACES_SAMPLER_ARG`), a ratio between 0 and 1 for the ratio samplers; upstream's is `\"0.05\"`.",
+                                    "pattern": "^((0(\\.[0-9]+)?)|(1(\\.0+)?))?$"
+                                }
+                            }
                         }
                     }
                 },

@@ -8,6 +8,20 @@ kserve:
     # @schema additionalProperties: {type: object, additionalProperties: {type: string}}
     # -- Per-preset image overrides, applied after the registry rewrite: `<preset name>: {<container name>: <image reference>}`. `main` is the runtime container of every preset, `llm-d-routing-sidecar` the routing sidecar of the decode presets; every other preset renders unchanged. See the README for the precedence and what an override image must provide.
     images: {}
+    # The `kserve-config-llm-tracing` preset, which the llmisvc controller appends to every `LLMInferenceService` whose spec carries `tracing` (an empty `tracing: {}` is enough): its `spec.tracing` becomes the OTLP exporter env and arguments of the vLLM `main` container and of the endpoint picker. An empty value keeps upstream's; any value set re-renders the preset from these keys.
+    tracing:
+      # @schema pattern: ^(https?://[^\s"'#]+)?$
+      # -- OTLP/gRPC endpoint the vLLM and endpoint-picker exporters send spans to (`spec.tracing.exporterEndpoint`); upstream's is `http://otel-collector:4317`. vLLM and the endpoint picker export over gRPC only.
+      exporterEndpoint: ""
+      # @schema enum: ["", always_on, always_off, traceidratio, parentbased_always_on, parentbased_always_off, parentbased_traceidratio]
+      # -- OpenTelemetry sampler (`spec.tracing.sampler`, `OTEL_TRACES_SAMPLER`); upstream's is `parentbased_traceidratio`.
+      sampler: ""
+      # @schema pattern: ^((0(\.[0-9]+)?)|(1(\.0+)?))?$
+      # -- Sampler argument (`spec.tracing.samplerArg`, `OTEL_TRACES_SAMPLER_ARG`), a ratio between 0 and 1 for the ratio samplers; upstream's is `"0.05"`.
+      samplerArg: ""
+      # @schema additionalProperties: {type: string}
+      # -- Labels the preset adds to the pods of an `LLMInferenceService` with tracing on (`spec.labels`, which the controller copies onto the workload pod template), e.g. the label an OTLP gateway routes a headerless export by. Not the prefill or endpoint-picker pods.
+      podLabels: {}
   servingruntime:
     # -- Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is.
     enabled: false
