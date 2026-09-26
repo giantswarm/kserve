@@ -34,7 +34,7 @@ tests:
           observability.giantswarm.io/tenant: giantswarm
     asserts:
       - hasDocuments:
-          count: 10
+          count: 13
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-tracing
@@ -95,7 +95,7 @@ tests:
           value: kserve-config-llm-template
         equal:
           path: spec.template.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
 
   - it: refuses a sampler outside the OpenTelemetry list
     set:

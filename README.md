@@ -10,10 +10,13 @@ Giant Swarm build of the [KServe](https://github.com/kserve/kserve) controllers.
 
 ## Upstream version
 
-Currently pinned to **v0.20.0**. The version is set in:
+Currently pinned to **v0.21.0**. The version is set in:
 
 - `Dockerfile` and `Dockerfile.llmisvc` (`KSERVE_VERSION` build arg -- tracked by Renovate)
 - `helm/*/Chart.yaml` and `helm/*/values.yaml` (`appVersion` / `kserve.version`, vendored from upstream)
+
+Upstream's v0.21.0 charts still carry `v0.21.0-rc1` as their `version` and `kserve.version`; here
+both say `v0.21.0`, the tag the images are built and mirrored at.
 
 ## Updating to a new upstream version
 
@@ -52,7 +55,7 @@ The llmisvc control plane is independent of the classic controller. Install:
 
 1. **Gateway API CRDs** (standard channel) -- prerequisite, not shipped here:
    `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml`
-   (KServe v0.20.0 builds against Gateway API v1.5.1)
+   (KServe v0.21.0 builds against Gateway API v1.5.1)
 2. `kserve-llmisvc-crd` -- the `LLMInferenceService` / `LLMInferenceServiceConfig` CRDs.
 3. `kserve-llmisvc-resources` -- the llmisvc controller. By default this also
    installs the Gateway API Inference Extension CRDs (`InferencePool` etc.)
@@ -124,11 +127,16 @@ deliberate changes. Re-apply them after a re-vendor:
   CRD gets it injected into the document loaded from `files/`).
 - `kserve-llmisvc-crd`: the conversion-webhook service namespace and the
   `cert-manager.io/inject-ca-from` annotation render `.Release.Namespace`
-  instead of the hardcoded `kserve`.
+  instead of the hardcoded `kserve`; in `kserve-crd` the `InferenceService`
+  CRD's `cert-manager.io/inject-ca-from` annotation does the same.
 - `kserve-runtime-configs`: the llmisvc presets' `ghcr.io/llm-d/` images are
   rewritten to `kserve.llmisvcConfigs.imageRegistry` (default
   `gsoci.azurecr.io/giantswarm/`), a container named in
   `kserve.llmisvcConfigs.images.<preset>.<container>` gets that image, and
+  the `docker.io/vllm/` image of the tokenizer preset is rewritten to its
+  gsoci copy (digest kept), `kserve.llmisvcConfigs.rolloutStrategy` sets the
+  single-node workload presets' `rolloutStrategy`, the tracing preset takes
+  `kserve.llmisvcConfigs.tracing`, and
   their hardcoded `namespace: kserve` follows `.Release.Namespace`
   (`kserve-common.replaceNamespace`); the file under `files/` stays upstream's
   verbatim, a preset without an override renders byte for byte. The
