@@ -14,6 +14,10 @@ WORKDIR /go/src/github.com/kserve/kserve
 
 RUN git clone --depth 1 --branch ${KSERVE_VERSION} https://github.com/kserve/kserve.git .
 
+# Giant Swarm's carried fixes, each one upstream-ready commit (README, "Carried patches").
+COPY patches/llmisvc/ /patches/
+RUN git apply --verbose /patches/*.patch
+
 RUN go mod download
 
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -o manager ./cmd/llmisvc
