@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `kserve-runtime-configs`: `kserve.llmisvcConfigs.tracing` sets the `kserve-config-llm-tracing` preset, which the llmisvc controller appends to every `LLMInferenceService` whose spec carries `tracing`: `exporterEndpoint`, `sampler` and `samplerArg` replace upstream's `http://otel-collector:4317`, `parentbased_traceidratio` and `0.05`, and `podLabels` become the preset's `spec.labels`, copied onto the workload pods that export. With no key set the preset renders as upstream ships it.
+
 ### Changed
 
 - `kserve-resources`, `kserve-llmisvc-resources`: the storage-initializer's resources in the `inferenceservice-config` ConfigMap (`memoryRequest`, `memoryLimit`, `cpuRequest`, `cpuLimit`) follow `kserve.storage.resources.*` instead of the literals the patch carried; the defaults are unchanged (100Mi / 1Gi, 100m / 1). An installation without a Kyverno policy that raises the limit sets it here — the 1Gi default is what the Hugging Face client's page cache overruns on a download.

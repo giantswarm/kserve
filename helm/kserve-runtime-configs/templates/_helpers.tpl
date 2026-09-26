@@ -135,3 +135,51 @@ on different ones); the result is parsed again to prove every container ended up
 {{- end -}}
 {{- $document -}}
 {{- end -}}
+
+{{/*
+The `kserve.llmisvcConfigs.tracing` keys that are set, as JSON: `exporterEndpoint`, `sampler` and
+`samplerArg` as strings, `podLabels` as a string map; `{}` when none is, and the tracing preset
+then renders as upstream ships it.
+
+Usage: {{ include "kserve-runtime-configs.tracingOverride" .Values.kserve.llmisvcConfigs.tracing | fromJson }}
+*/}}
+{{- define "kserve-runtime-configs.tracingOverride" -}}
+{{- $values := . | default dict -}}
+{{- $set := dict -}}
+{{- range $key := list "exporterEndpoint" "sampler" "samplerArg" -}}
+  {{- with index $values $key -}}{{- $_ := set $set $key (toString .) -}}{{- end -}}
+{{- end -}}
+{{- with $values.podLabels -}}
+  {{- $labels := dict -}}
+  {{- range $name, $value := . -}}{{- $_ := set $labels $name (toString $value) -}}{{- end -}}
+  {{- $_ := set $set "podLabels" $labels -}}
+{{- end -}}
+{{- $set | toJson -}}
+{{- end -}}
+
+{{/*
+The `kserve-config-llm-tracing` preset with the set tracing keys applied.
+
+Usage: {{ include "kserve-runtime-configs.overrideTracing" (list $document $tracing) }}
+
+$document is the preset as rendered so far, $tracing the result of
+`kserve-runtime-configs.tracingOverride`. `exporterEndpoint`, `sampler` and `samplerArg` replace the
+same keys of `spec.tracing`, which keeps upstream's `exporter`; `podLabels` merge over the
+preset's `spec.labels`. The document is re-serialized, so its keys come out sorted.
+*/}}
+{{- define "kserve-runtime-configs.overrideTracing" -}}
+{{- $document := index . 0 -}}
+{{- $tracing := index . 1 -}}
+{{- $preset := fromYaml $document -}}
+{{- $spec := $preset.spec | default dict -}}
+{{- $block := $spec.tracing | default dict -}}
+{{- range $key := list "exporterEndpoint" "sampler" "samplerArg" -}}
+  {{- if hasKey $tracing $key -}}{{- $_ := set $block $key (index $tracing $key) -}}{{- end -}}
+{{- end -}}
+{{- $_ := set $spec "tracing" $block -}}
+{{- with $tracing.podLabels -}}
+  {{- $_ := set $spec "labels" (merge (dict) . ($spec.labels | default dict)) -}}
+{{- end -}}
+{{- $_ := set $preset "spec" $spec -}}
+{{- printf "\n%s\n" (toYaml $preset) -}}
+{{- end -}}

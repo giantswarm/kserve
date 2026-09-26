@@ -1,0 +1,122 @@
+# kserve.llmisvcConfigs.tracing re-renders the kserve-config-llm-tracing preset, which the llmisvc
+# controller appends to every LLMInferenceService whose spec carries `tracing`. Run with
+# `make helm-test`.
+suite: llmisvc tracing preset
+templates:
+  - templates/llmisvcconfigs/resources.yaml
+tests:
+  - it: keeps upstream's tracing preset without a value
+    set:
+      kserve.llmisvcConfigs.enabled: true
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-tracing
+        equal:
+          path: spec
+          value:
+            tracing:
+              exporter: otlp
+              exporterEndpoint: http://otel-collector:4317
+              sampler: parentbased_traceidratio
+              samplerArg: "0.05"
+
+  - it: sets the endpoint, the sampler and the pod labels, and keeps the exporter
+    release:
+      namespace: model-serving
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing:
+        exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+        sampler: traceidratio
+        samplerArg: "0.1"
+        podLabels:
+          observability.giantswarm.io/tenant: giantswarm
+    asserts:
+      - hasDocuments:
+          count: 10
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-tracing
+        equal:
+          path: metadata.namespace
+          value: model-serving
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-tracing
+        equal:
+          path: spec
+          value:
+            labels:
+              observability.giantswarm.io/tenant: giantswarm
+            tracing:
+              exporter: otlp
+              exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+              sampler: traceidratio
+              samplerArg: "0.1"
+
+  - it: sets the endpoint alone and keeps upstream's sampler
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing.exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-tracing
+        equal:
+          path: spec
+          value:
+            tracing:
+              exporter: otlp
+              exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+              sampler: parentbased_traceidratio
+              samplerArg: "0.05"
+
+  - it: leaves every other preset untouched
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing:
+        exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
+        podLabels:
+          observability.giantswarm.io/tenant: giantswarm
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        notExists:
+          path: spec.labels
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        notExists:
+          path: spec.tracing
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+
+  - it: refuses a sampler outside the OpenTelemetry list
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing.sampler: jaeger_remote
+    asserts:
+      - failedTemplate:
+          errorPattern: "tracing/sampler'"
+
+  - it: refuses a sampler argument outside 0..1
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing.samplerArg: "1.5"
+    asserts:
+      - failedTemplate:
+          errorPattern: "tracing/samplerArg'"
+
+  - it: refuses an endpoint without a scheme
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.tracing.exporterEndpoint: otlp-gateway.kube-system.svc:4317
+    asserts:
+      - failedTemplate:
+          errorPattern: "tracing/exporterEndpoint'"
