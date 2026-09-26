@@ -34,6 +34,17 @@ Renovate opens PRs when a new KServe release appears on GitHub (bumping the
    and `make check-image-registry` (every image default is a gsoci reference).
 4. Commit, push, and tag.
 
+## Carried patches
+
+`Dockerfile.llmisvc` applies every patch under `patches/llmisvc/` to the upstream
+source before it builds the llmisvc controller. Each is one upstream-ready
+commit (`git format-patch` output) that goes upstream and is dropped here once
+a release carries it. A patch that no longer applies fails the image build.
+
+| Patch | What it fixes |
+|---|---|
+| `0001-llmisvc-ready-needs-an-available-replica.patch` | With `spec.rolloutStrategy.maxUnavailable` at or above the replica count (`maxSurge: 0`, `maxUnavailable: 1` on one replica), the Deployment is Available with no pod serving, and the `LLMInferenceService` turned Ready before its model served. A workload that desires replicas is now ready only with one available. |
+
 ## Charts
 
 Starting with v0.17.0, upstream split the single `kserve` chart; since v0.20.0
