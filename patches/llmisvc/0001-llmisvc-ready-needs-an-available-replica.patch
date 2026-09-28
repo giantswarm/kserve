@@ -1,0 +1,144 @@
+From 6fdf06800706f13004bee21eeab737eabfc86349 Mon Sep 17 00:00:00 2001
+From: Timo Derstappen <timo@giantswarm.io>
+Date: Sat, 26 Sep 2026 20:07:41 +0300
+Subject: [PATCH] fix(llmisvc): a workload with no available replica is not
+ ready
+
+Kubernetes reports a Deployment Available once at least replicas - maxUnavailable replicas are available. With spec.rolloutStrategy.maxUnavailable at or above the replica count (maxSurge: 0, maxUnavailable: 1 on a single replica, the strategy that lets a model filling its accelerator roll), that holds with zero replicas, so MainWorkloadReady and Ready turned true before any pod served and stayed true through every roll.
+
+The workload's readiness now also requires an available replica whenever the Deployment desires any.
+
+Signed-off-by: Timo Derstappen <timo@giantswarm.io>
+---
+ .../llmisvc/workload_readiness_test.go        | 61 +++++++++++++++++++
+ .../v1alpha2/llmisvc/workload_single_node.go  | 40 ++++++++----
+ 2 files changed, 90 insertions(+), 11 deletions(-)
+ create mode 100644 pkg/controller/v1alpha2/llmisvc/workload_readiness_test.go
+
+diff --git a/pkg/controller/v1alpha2/llmisvc/workload_readiness_test.go b/pkg/controller/v1alpha2/llmisvc/workload_readiness_test.go
+new file mode 100644
+index 0000000..a95eb5d
+--- /dev/null
++++ b/pkg/controller/v1alpha2/llmisvc/workload_readiness_test.go
+@@ -0,0 +1,61 @@
++/*
++Copyright 2026 The KServe Authors.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++*/
++
++package llmisvc
++
++import (
++	"testing"
++
++	appsv1 "k8s.io/api/apps/v1"
++	corev1 "k8s.io/api/core/v1"
++	"k8s.io/utils/ptr"
++)
++
++func TestDeploymentReadiness(t *testing.T) {
++	available := appsv1.DeploymentCondition{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: "MinimumReplicasAvailable"}
++	unavailable := appsv1.DeploymentCondition{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionFalse, Reason: "MinimumReplicasUnavailable", Message: "Deployment does not have minimum availability."}
++	stalled := appsv1.DeploymentCondition{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionFalse, Reason: "ProgressDeadlineExceeded", Message: "ReplicaSet has timed out progressing."}
++
++	tests := []struct {
++		name       string
++		replicas   *int32
++		available  int32
++		conditions []appsv1.DeploymentCondition
++		ready      bool
++		reason     string
++	}{
++		{name: "available with a serving replica", replicas: ptr.To(int32(1)), available: 1, conditions: []appsv1.DeploymentCondition{available}, ready: true},
++		{name: "available by maxUnavailable alone, no replica serving", replicas: ptr.To(int32(1)), available: 0, conditions: []appsv1.DeploymentCondition{available}, reason: "MinimumReplicasUnavailable"},
++		{name: "replicas defaulted, none serving", replicas: nil, available: 0, conditions: []appsv1.DeploymentCondition{available}, reason: "MinimumReplicasUnavailable"},
++		{name: "scaled to zero", replicas: ptr.To(int32(0)), available: 0, conditions: []appsv1.DeploymentCondition{available}, ready: true},
++		{name: "not available", replicas: ptr.To(int32(1)), available: 0, conditions: []appsv1.DeploymentCondition{unavailable}, reason: "MinimumReplicasUnavailable"},
++		{name: "available wins over a stalled rollout", replicas: ptr.To(int32(1)), available: 1, conditions: []appsv1.DeploymentCondition{stalled, available}, ready: true},
++		{name: "stalled without an Available condition", replicas: ptr.To(int32(1)), conditions: []appsv1.DeploymentCondition{stalled}, reason: "ProgressDeadlineExceeded"},
++		{name: "no conditions yet", replicas: ptr.To(int32(1)), reason: string(appsv1.DeploymentProgressing)},
++	}
++	for _, tt := range tests {
++		t.Run(tt.name, func(t *testing.T) {
++			d := &appsv1.Deployment{
++				Spec:   appsv1.DeploymentSpec{Replicas: tt.replicas},
++				Status: appsv1.DeploymentStatus{AvailableReplicas: tt.available, Conditions: tt.conditions},
++			}
++			ready, reason, _ := deploymentReadiness(d)
++			if ready != tt.ready || reason != tt.reason {
++				t.Errorf("deploymentReadiness() = %v, %q; want %v, %q", ready, reason, tt.ready, tt.reason)
++			}
++		})
++	}
++}
+diff --git a/pkg/controller/v1alpha2/llmisvc/workload_single_node.go b/pkg/controller/v1alpha2/llmisvc/workload_single_node.go
+index 91420c1..3dfec6c 100644
+--- a/pkg/controller/v1alpha2/llmisvc/workload_single_node.go
++++ b/pkg/controller/v1alpha2/llmisvc/workload_single_node.go
+@@ -342,24 +342,42 @@ func (r *LLMISVCReconciler) propagateWorkloadDeploymentStatus(ctx context.Contex
+ 	if err != nil {
+ 		return fmt.Errorf("failed to get current deployment %s/%s: %w", expected.GetNamespace(), expected.GetName(), err)
+ 	}
++	if isReady, reason, message := deploymentReadiness(curr); isReady {
++		ready()
++	} else {
++		notReady(reason, message)
++	}
++	return nil
++}
++
++// deploymentReadiness reports whether a workload Deployment serves, and why not when it does not.
++// The Deployment's Available condition is the signal, with one exception: a Deployment that
++// desires replicas but has none available is not ready. Kubernetes computes Available as at least
++// replicas - maxUnavailable available replicas, so with rolloutStrategy.maxUnavailable at or above
++// the replica count (maxSurge: 0, maxUnavailable: 1 on a single replica) it reports Available with
++// no pod serving.
++func deploymentReadiness(curr *appsv1.Deployment) (bool, string, string) {
++	reason, message := string(appsv1.DeploymentProgressing), ""
+ 	for _, cond := range curr.Status.Conditions {
+-		if cond.Type == appsv1.DeploymentProgressing {
+-			if cond.Status == corev1.ConditionFalse {
+-				notReady(cond.Reason, cond.Message)
+-			}
++		if cond.Type == appsv1.DeploymentProgressing && cond.Status == corev1.ConditionFalse {
++			reason, message = cond.Reason, cond.Message
+ 		}
+
+ 		if cond.Type == appsv1.DeploymentAvailable {
+-			if cond.Status == corev1.ConditionTrue {
+-				ready()
+-			} else {
+-				notReady(cond.Reason, cond.Message)
++			if cond.Status != corev1.ConditionTrue {
++				return false, cond.Reason, cond.Message
++			}
++			desired := int32(1)
++			if curr.Spec.Replicas != nil {
++				desired = *curr.Spec.Replicas
+ 			}
+-			return nil
++			if desired > 0 && curr.Status.AvailableReplicas == 0 {
++				return false, "MinimumReplicasUnavailable", fmt.Sprintf("Deployment has 0 of %d replicas available", desired)
++			}
++			return true, "", ""
+ 		}
+ 	}
+-	notReady(string(appsv1.DeploymentProgressing), "")
+-	return nil
++	return false, reason, message
+ }
+
+ func semanticDeploymentIsEqual(expected *appsv1.Deployment, curr *appsv1.Deployment) bool {
+--
+2.55.0

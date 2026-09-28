@@ -10,19 +10,19 @@ tests:
       kserve.llmisvcConfigs.enabled: true
     asserts:
       - hasDocuments:
-          count: 10
+          count: 13
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-template
         equal:
           path: spec.template.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-decode-template
         equal:
           path: spec.template.initContainers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.9.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.10.0
       - notMatchRegexRaw:
           pattern: ghcr\.io/llm-d/
 
@@ -50,19 +50,19 @@ tests:
           value: kserve-config-llm-decode-template
         equal:
           path: spec.template.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-worker-data-parallel
         equal:
           path: spec.worker.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-prefill-template
         equal:
           path: spec.prefill.template.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
 
   - it: replaces both main containers of a data-parallel preset
     set:
@@ -88,7 +88,7 @@ tests:
           value: kserve-config-llm-template
         equal:
           path: spec.template.containers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.8.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-cuda:v0.9.0
 
   - it: replaces the routing sidecar and the runtime of a decode preset independently
     set:
@@ -115,28 +115,39 @@ tests:
           value: kserve-config-llm-decode-worker-data-parallel
         equal:
           path: spec.template.initContainers[0].image
-          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.9.0
+          value: gsoci.azurecr.io/giantswarm/llm-d-router-disagg-sidecar:v0.10.0
 
   - it: applies the override after a custom registry rewrite
     set:
       kserve.llmisvcConfigs.enabled: true
       kserve.llmisvcConfigs.imageRegistry: ghcr.io/llm-d/
       kserve.llmisvcConfigs.images:
-        kserve-config-llm-scheduler:
-          tokenizer: example.com/tokenizer:1
+        kserve-config-llm-tokenizer:
+          main: example.com/tokenizer:1
     asserts:
       - documentSelector:
           path: metadata.name
-          value: kserve-config-llm-scheduler
+          value: kserve-config-llm-tokenizer
         equal:
-          path: spec.router.scheduler.template.containers[1].image
+          path: spec.router.scheduler.tokenizer.template.containers[0].image
           value: example.com/tokenizer:1
       - documentSelector:
           path: metadata.name
           value: kserve-config-llm-scheduler
         equal:
           path: spec.router.scheduler.template.containers[0].image
-          value: ghcr.io/llm-d/llm-d-router-endpoint-picker:v0.9.0
+          value: ghcr.io/llm-d/llm-d-router-endpoint-picker:v0.10.0
+
+  - it: points the tokenizer preset at the gsoci copy of vLLM's CPU image, digest kept
+    set:
+      kserve.llmisvcConfigs.enabled: true
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-tokenizer
+        equal:
+          path: spec.router.scheduler.tokenizer.template.containers[0].image
+          value: gsoci.azurecr.io/giantswarm/vllm-openai-cpu:v0.23.0@sha256:89e1fbe829038b1a560601990c8ec89625c622a969fcbc8f10ce48b6139795be
 
   - it: fails for a preset the file does not have
     set:

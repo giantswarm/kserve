@@ -1,6 +1,6 @@
 # kserve-llmisvc-resources
 
-![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.0](https://img.shields.io/badge/AppVersion-v0.20.0-informational?style=flat-square)
+![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.21.0](https://img.shields.io/badge/AppVersion-v0.21.0-informational?style=flat-square)
 
 Helm chart for deploying KServe LLMInferenceService resources
 
@@ -28,7 +28,7 @@ $ helm install kserve-llmisvc-resources oci://ghcr.io/kserve/charts/kserve-llmis
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| kserve.version | string | `"v0.20.0"` |  |
+| kserve.version | string | `"v0.21.0"` |  |
 | kserve.createSharedResources | bool | `true` |  |
 | kserve.inferenceServiceConfig.enabled | string | `""` |  |
 | kserve.certManager.enabled | string | `""` |  |

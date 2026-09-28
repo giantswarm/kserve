@@ -1,0 +1,77 @@
+# kserve.llmisvcConfigs.rolloutStrategy sets the rollout of the single-node workload presets, which
+# the llmisvc controller merges into every LLMInferenceService composed from them. Run with
+# `make helm-test`.
+suite: llmisvc rollout strategy
+templates:
+  - templates/llmisvcconfigs/resources.yaml
+tests:
+  - it: keeps upstream's presets without a value
+    set:
+      kserve.llmisvcConfigs.enabled: true
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        notExists:
+          path: spec.rolloutStrategy
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        notExists:
+          path: spec.prefill.rolloutStrategy
+
+  - it: sets the strategy on the main, decode and prefill workload presets
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.rolloutStrategy:
+        maxSurge: 0
+        maxUnavailable: 1
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.rolloutStrategy
+          value:
+            maxSurge: 0
+            maxUnavailable: 1
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.rolloutStrategy
+          value:
+            maxSurge: 0
+            maxUnavailable: 1
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        equal:
+          path: spec.prefill.rolloutStrategy
+          value:
+            maxSurge: 0
+            maxUnavailable: 1
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        exists:
+          path: spec.prefill.template
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        notExists:
+          path: spec.rolloutStrategy
+
+  - it: sets one key and leaves the other to the default
+    set:
+      kserve.llmisvcConfigs.enabled: true
+      kserve.llmisvcConfigs.rolloutStrategy:
+        maxUnavailable: 50%
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.rolloutStrategy
+          value:
+            maxUnavailable: 50%

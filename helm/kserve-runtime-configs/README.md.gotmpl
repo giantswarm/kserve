@@ -24,9 +24,12 @@ then in its own. Every `LLMInferenceService` fails at config lookup without them
 At render time every `ghcr.io/llm-d/` image the presets pin is rewritten to
 `kserve.llmisvcConfigs.imageRegistry`. The default, `gsoci.azurecr.io/giantswarm/`, is the mirror
 set [giantswarm/llm-d](https://github.com/giantswarm/llm-d) keeps digest-identical to upstream at
-the same tags (`llm-d-cuda`, `llm-d-router-endpoint-picker`, `llm-d-router-disagg-sidecar`,
-`llm-d-uds-tokenizer`, the two latency predictors); set it to `ghcr.io/llm-d/` to render
-upstream's images. The tags are the presets', never a value.
+the same tags (`llm-d-cuda`, `llm-d-router-endpoint-picker`, `llm-d-router-disagg-sidecar`, the
+two latency predictors); set it to `ghcr.io/llm-d/` to render upstream's images. The tags are the
+presets', never a value. The `docker.io/vllm/` image of the `kserve-config-llm-tokenizer` preset
+(vLLM's CPU server, the tokenizer sidecar) renders as the digest-identical copy
+[giantswarm/retagger](https://github.com/giantswarm/retagger) keeps at
+`gsoci.azurecr.io/giantswarm/`, digest included, whatever `imageRegistry` says.
 
 The [agent-platform](https://github.com/giantswarm/agent-platform) chart consumes this chart as its
 `kserve-runtime-configs` component with `kserve.llmisvcConfigs.enabled: true` and
@@ -102,6 +105,30 @@ kserve:
       exporterEndpoint: http://otlp-gateway.kube-system.svc:4317
       podLabels:
         observability.giantswarm.io/tenant: giantswarm
+```
+
+### Rollout strategy
+
+`kserve.llmisvcConfigs.rolloutStrategy` sets how the workload Deployment of a single-node
+`LLMInferenceService` rolls: `spec.rolloutStrategy` of `kserve-config-llm-template` and
+`kserve-config-llm-decode-template`, `spec.prefill.rolloutStrategy` of
+`kserve-config-llm-prefill-template`. The controller merges those presets into every service that
+composes from them and sets the Deployment's `strategy.rollingUpdate` from the merged value, so the
+setting reaches services created before it. A service's own `rolloutStrategy` wins; the multi-node
+presets (LeaderWorkerSets, `maxSurge: 0` already) are left alone. Unset keys keep the Deployment
+default of 25 % surge and 25 % unavailable.
+
+A model that fills its GPU cannot start a surge pod beside the old one: the roll of a changed
+service never finishes. `maxSurge: 0` with `maxUnavailable: 1` stops the old pod first, at the cost
+of a short outage per roll of a one-replica service:
+
+```yaml
+kserve:
+  llmisvcConfigs:
+    enabled: true
+    rolloutStrategy:
+      maxSurge: 0
+      maxUnavailable: 1
 ```
 
 ## Classic ServingRuntimes

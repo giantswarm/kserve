@@ -1,5 +1,5 @@
 kserve:
-  version: v0.20.0
+  version: v0.21.0
   llmisvcConfigs:
     # -- Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`).
     enabled: false
@@ -22,6 +22,14 @@ kserve:
       # @schema additionalProperties: {type: string}
       # -- Labels the preset adds to the pods of an `LLMInferenceService` with tracing on (`spec.labels`, which the controller copies onto the workload pod template), e.g. the label an OTLP gateway routes a headerless export by. Not the prefill or endpoint-picker pods.
       podLabels: {}
+    # The rollout of the workload Deployment of every single-node `LLMInferenceService` (`spec.rolloutStrategy` of the `kserve-config-llm-template` and `kserve-config-llm-decode-template` presets, `spec.prefill.rolloutStrategy` of `kserve-config-llm-prefill-template`), which the llmisvc controller merges into every service that composes from them. An empty value keeps the Deployment default (25 % surge, 25 % unavailable); a service's own `rolloutStrategy` wins. `maxSurge: 0` with `maxUnavailable: 1` stops the old pod before the new one starts: the roll of a model that fills its GPU cannot start its surge pod beside the old one.
+    rolloutStrategy:
+      # @schema type: [string, integer]; pattern: ^([0-9]+%?)?$
+      # -- Pods above the desired count during a roll (`maxSurge`), a number or a percentage; empty keeps the default.
+      maxSurge: ""
+      # @schema type: [string, integer]; pattern: ^([0-9]+%?)?$
+      # -- Pods below the desired count during a roll (`maxUnavailable`), a number or a percentage; empty keeps the default.
+      maxUnavailable: ""
   servingruntime:
     # -- Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is.
     enabled: false

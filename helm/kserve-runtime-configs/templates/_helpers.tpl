@@ -183,3 +183,47 @@ preset's `spec.labels`. The document is re-serialized, so its keys come out sort
 {{- $_ := set $preset "spec" $spec -}}
 {{- printf "\n%s\n" (toYaml $preset) -}}
 {{- end -}}
+
+{{/*
+The set keys of `kserve.llmisvcConfigs.rolloutStrategy` as JSON: `maxSurge` and `maxUnavailable`,
+each an absolute number or a percentage; an empty or absent key keeps the Deployment default.
+
+Usage: {{- $rollout := include "kserve-runtime-configs.rolloutStrategyOverride" .Values.kserve.llmisvcConfigs.rolloutStrategy | fromJson }}
+*/}}
+{{- define "kserve-runtime-configs.rolloutStrategyOverride" -}}
+{{- $values := . | default dict -}}
+{{- $set := dict -}}
+{{- range $key := list "maxSurge" "maxUnavailable" -}}
+  {{- $value := index $values $key -}}
+  {{- if and (not (kindIs "invalid" $value)) (ne (toString $value) "") -}}{{- $_ := set $set $key $value -}}{{- end -}}
+{{- end -}}
+{{- $set | toJson -}}
+{{- end -}}
+
+{{/*
+A single-node workload preset with the rollout strategy applied.
+
+Usage: {{ include "kserve-runtime-configs.overrideRolloutStrategy" (list $document $workload $rollout) }}
+
+$document is the preset as rendered so far, $workload the spec key of its workload ("" for the
+main workload, "prefill" for the prefill one), $rollout the result of
+`kserve-runtime-configs.rolloutStrategyOverride`. The llmisvc controller merges the preset into
+every LLMInferenceService that composes from it and sets the strategy of the workload's
+Deployment from `rolloutStrategy`. The document is re-serialized, so its keys come out sorted.
+*/}}
+{{- define "kserve-runtime-configs.overrideRolloutStrategy" -}}
+{{- $document := index . 0 -}}
+{{- $workload := index . 1 -}}
+{{- $rollout := index . 2 -}}
+{{- $preset := fromYaml $document -}}
+{{- $spec := $preset.spec | default dict -}}
+{{- if $workload -}}
+  {{- $block := index $spec $workload | default dict -}}
+  {{- $_ := set $block "rolloutStrategy" $rollout -}}
+  {{- $_ := set $spec $workload $block -}}
+{{- else -}}
+  {{- $_ := set $spec "rolloutStrategy" $rollout -}}
+{{- end -}}
+{{- $_ := set $preset "spec" $spec -}}
+{{- printf "\n%s\n" (toYaml $preset) -}}
+{{- end -}}

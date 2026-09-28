@@ -119,6 +119,28 @@
                                 }
                             }
                         },
+                        "rolloutStrategy": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "maxSurge": {
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ],
+                                    "description": "Pods above the desired count during a roll (`maxSurge`), a number or a percentage; empty keeps the default.",
+                                    "pattern": "^([0-9]+%?)?$"
+                                },
+                                "maxUnavailable": {
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ],
+                                    "description": "Pods below the desired count during a roll (`maxUnavailable`), a number or a percentage; empty keeps the default.",
+                                    "pattern": "^([0-9]+%?)?$"
+                                }
+                            }
+                        },
                         "tracing": {
                             "type": "object",
                             "additionalProperties": false,

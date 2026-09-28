@@ -2,9 +2,11 @@
 {{- /*
 Giant Swarm overlay: the presets are upstream's file verbatim. At render time, in this order:
 every `ghcr.io/llm-d/` image is rewritten to `kserve.llmisvcConfigs.imageRegistry` (the
-digest-identical mirror set giantswarm/llm-d keeps on gsoci by default); a container named in
+digest-identical mirror set giantswarm/llm-d keeps on gsoci by default) and every `docker.io/vllm/`
+image to its digest-identical giantswarm/retagger copy on gsoci; a container named in
 `kserve.llmisvcConfigs.images.<preset>.<container>` gets that image instead (every other preset
-stays as it is); the tracing preset takes `kserve.llmisvcConfigs.tracing`; the hardcoded
+stays as it is); the tracing preset takes `kserve.llmisvcConfigs.tracing`; the single-node
+workload presets take `kserve.llmisvcConfigs.rolloutStrategy`; the hardcoded
 `namespace: kserve` follows the release namespace. The file is handled document by document so a
 preset without an override renders byte for byte as upstream ships it.
 */}}
@@ -12,7 +14,9 @@ preset without an override renders byte for byte as upstream ships it.
 {{- $overrides := .Values.kserve.llmisvcConfigs.images | default dict }}
 {{- $tracingPreset := "kserve-config-llm-tracing" }}
 {{- $tracing := include "kserve-runtime-configs.tracingOverride" .Values.kserve.llmisvcConfigs.tracing | fromJson }}
-{{- $content := .Files.Get "files/llmisvcconfigs/resources.yaml" | replace "ghcr.io/llm-d/" (printf "%s/" (trimSuffix "/" $registry)) }}
+{{- $rollout := include "kserve-runtime-configs.rolloutStrategyOverride" .Values.kserve.llmisvcConfigs.rolloutStrategy | fromJson }}
+{{- $rolloutPresets := dict "kserve-config-llm-template" "" "kserve-config-llm-decode-template" "" "kserve-config-llm-prefill-template" "prefill" }}
+{{- $content := .Files.Get "files/llmisvcconfigs/resources.yaml" | replace "ghcr.io/llm-d/" (printf "%s/" (trimSuffix "/" $registry)) | replace "docker.io/vllm/" "gsoci.azurecr.io/giantswarm/" }}
 {{- $documents := list }}
 {{- $presets := list }}
 {{- range $document := regexSplit "(?m)^---$" $content -1 }}
@@ -25,11 +29,21 @@ preset without an override renders byte for byte as upstream ships it.
     {{- if and $tracing (eq $preset $tracingPreset) }}
       {{- $document = include "kserve-runtime-configs.overrideTracing" (list $document $tracing) }}
     {{- end }}
+    {{- if and $rollout (hasKey $rolloutPresets $preset) }}
+      {{- $document = include "kserve-runtime-configs.overrideRolloutStrategy" (list $document (index $rolloutPresets $preset) $rollout) }}
+    {{- end }}
   {{- end }}
   {{- $documents = append $documents $document }}
 {{- end }}
 {{- if and $tracing (not (has $tracingPreset $presets)) }}
   {{- fail (printf "kserve.llmisvcConfigs.tracing: no preset %s (the presets are: %s)" $tracingPreset (join ", " $presets)) }}
+{{- end }}
+{{- if $rollout }}
+  {{- range $preset, $_ := $rolloutPresets }}
+    {{- if not (has $preset $presets) }}
+      {{- fail (printf "kserve.llmisvcConfigs.rolloutStrategy: no preset %s (the presets are: %s)" $preset (join ", " $presets)) }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- range $preset, $_ := $overrides }}
   {{- if not (has $preset $presets) }}

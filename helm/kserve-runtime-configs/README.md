@@ -1,6 +1,6 @@
 # kserve-runtime-configs
 
-![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.0](https://img.shields.io/badge/AppVersion-v0.20.0-informational?style=flat-square)
+![Version: [[ .Version ]]](https://img.shields.io/badge/Version-[[ .Version ]]-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.21.0](https://img.shields.io/badge/AppVersion-v0.21.0-informational?style=flat-square)
 
 KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference Configs
 
@@ -24,9 +24,12 @@ then in its own. Every `LLMInferenceService` fails at config lookup without them
 At render time every `ghcr.io/llm-d/` image the presets pin is rewritten to
 `kserve.llmisvcConfigs.imageRegistry`. The default, `gsoci.azurecr.io/giantswarm/`, is the mirror
 set [giantswarm/llm-d](https://github.com/giantswarm/llm-d) keeps digest-identical to upstream at
-the same tags (`llm-d-cuda`, `llm-d-router-endpoint-picker`, `llm-d-router-disagg-sidecar`,
-`llm-d-uds-tokenizer`, the two latency predictors); set it to `ghcr.io/llm-d/` to render
-upstream's images. The tags are the presets', never a value.
+the same tags (`llm-d-cuda`, `llm-d-router-endpoint-picker`, `llm-d-router-disagg-sidecar`, the
+two latency predictors); set it to `ghcr.io/llm-d/` to render upstream's images. The tags are the
+presets', never a value. The `docker.io/vllm/` image of the `kserve-config-llm-tokenizer` preset
+(vLLM's CPU server, the tokenizer sidecar) renders as the digest-identical copy
+[giantswarm/retagger](https://github.com/giantswarm/retagger) keeps at
+`gsoci.azurecr.io/giantswarm/`, digest included, whatever `imageRegistry` says.
 
 The [agent-platform](https://github.com/giantswarm/agent-platform) chart consumes this chart as its
 `kserve-runtime-configs` component with `kserve.llmisvcConfigs.enabled: true` and
@@ -104,6 +107,30 @@ kserve:
         observability.giantswarm.io/tenant: giantswarm
 ```
 
+### Rollout strategy
+
+`kserve.llmisvcConfigs.rolloutStrategy` sets how the workload Deployment of a single-node
+`LLMInferenceService` rolls: `spec.rolloutStrategy` of `kserve-config-llm-template` and
+`kserve-config-llm-decode-template`, `spec.prefill.rolloutStrategy` of
+`kserve-config-llm-prefill-template`. The controller merges those presets into every service that
+composes from them and sets the Deployment's `strategy.rollingUpdate` from the merged value, so the
+setting reaches services created before it. A service's own `rolloutStrategy` wins; the multi-node
+presets (LeaderWorkerSets, `maxSurge: 0` already) are left alone. Unset keys keep the Deployment
+default of 25 % surge and 25 % unavailable.
+
+A model that fills its GPU cannot start a surge pod beside the old one: the roll of a changed
+service never finishes. `maxSurge: 0` with `maxUnavailable: 1` stops the old pod first, at the cost
+of a short outage per roll of a one-replica service:
+
+```yaml
+kserve:
+  llmisvcConfigs:
+    enabled: true
+    rolloutStrategy:
+      maxSurge: 0
+      maxUnavailable: 1
+```
+
 ## Classic ServingRuntimes
 
 The Giant Swarm serving path is llm-d only: models are `LLMInferenceService`s composed from the
@@ -128,7 +155,7 @@ multinode runtime follows `huggingfaceserver.image`), and rendering fails when n
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| kserve.version | string | `"v0.20.0"` |  |
+| kserve.version | string | `"v0.21.0"` |  |
 | kserve.llmisvcConfigs.enabled | bool | `false` | Ship KServe's well-known `LLMInferenceServiceConfig` presets (`files/llmisvcconfigs`). |
 | kserve.llmisvcConfigs.imageRegistry | string | `"gsoci.azurecr.io/giantswarm/"` | Registry prefix the presets' `ghcr.io/llm-d/` images are rewritten to at render time. The default is the digest-identical mirror set giantswarm/llm-d keeps on gsoci at the same tags; set `ghcr.io/llm-d/` to render upstream's images. |
 | kserve.llmisvcConfigs.images | object | `{}` | Per-preset image overrides, applied after the registry rewrite: `<preset name>: {<container name>: <image reference>}`. `main` is the runtime container of every preset, `llm-d-routing-sidecar` the routing sidecar of the decode presets; every other preset renders unchanged. See the README for the precedence and what an override image must provide. |
@@ -136,6 +163,8 @@ multinode runtime follows `huggingfaceserver.image`), and rendering fails when n
 | kserve.llmisvcConfigs.tracing.sampler | string | `""` | OpenTelemetry sampler (`spec.tracing.sampler`, `OTEL_TRACES_SAMPLER`); upstream's is `parentbased_traceidratio`. |
 | kserve.llmisvcConfigs.tracing.samplerArg | string | `""` | Sampler argument (`spec.tracing.samplerArg`, `OTEL_TRACES_SAMPLER_ARG`), a ratio between 0 and 1 for the ratio samplers; upstream's is `"0.05"`. |
 | kserve.llmisvcConfigs.tracing.podLabels | object | `{}` | Labels the preset adds to the pods of an `LLMInferenceService` with tracing on (`spec.labels`, which the controller copies onto the workload pod template), e.g. the label an OTLP gateway routes a headerless export by. Not the prefill or endpoint-picker pods. |
+| kserve.llmisvcConfigs.rolloutStrategy.maxSurge | string | `""` | Pods above the desired count during a roll (`maxSurge`), a number or a percentage; empty keeps the default. |
+| kserve.llmisvcConfigs.rolloutStrategy.maxUnavailable | string | `""` | Pods below the desired count during a roll (`maxUnavailable`), a number or a percentage; empty keeps the default. |
 | kserve.servingruntime.enabled | bool | `false` | Render the classic `ClusterServingRuntime`s (`files/runtimes`). Not part of the Giant Swarm serving path, which is llm-d only: the chart ships no third-party runtime image, so a runtime renders only when its `image` is set, and the switch fails when none is. |
 | kserve.servingruntime.modelNamePlaceholder | string | `"{{.Name}}"` |  |
 | kserve.servingruntime.tensorflow.disabled | bool | `false` |  |
