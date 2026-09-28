@@ -93,7 +93,7 @@ $ helm install kserve-resources oci://ghcr.io/kserve/charts/kserve-resources --v
 | kserve.autoscaler.scaleUpStabilizationWindowSeconds | string | `"0"` |  |
 | kserve.autoscaler.scaleDownStabilizationWindowSeconds | string | `"300"` |  |
 | kserve.controller.deploymentMode | string | `"Knative"` |  |
-| kserve.controller.rbacProxyImage | string | `"gsoci.azurecr.io/giantswarm/kube-rbac-proxy:v0.22.1"` |  |
+| kserve.controller.rbacProxyImage | string | `"gsoci.azurecr.io/giantswarm/kube-rbac-proxy:v0.23.0"` |  |
 | kserve.controller.rbacProxy.resources.limits.cpu | string | `"100m"` |  |
 | kserve.controller.rbacProxy.resources.limits.memory | string | `"300Mi"` |  |
 | kserve.controller.rbacProxy.resources.requests.cpu | string | `"100m"` |  |

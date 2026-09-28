@@ -107,7 +107,7 @@ kserve:
     scaleDownStabilizationWindowSeconds: '300'
   controller:
     deploymentMode: Knative
-    rbacProxyImage: gsoci.azurecr.io/giantswarm/kube-rbac-proxy:v0.22.1
+    rbacProxyImage: gsoci.azurecr.io/giantswarm/kube-rbac-proxy:v0.23.0
     rbacProxy:
       resources:
         limits:
