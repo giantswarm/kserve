@@ -86,7 +86,9 @@ once more, inside the argument: `--limit-mm-per-prompt='{"image": 1, "audio": 0}
 `- "--limit-mm-per-prompt='{\"image\": 1, \"audio\": 0}'"`) reaches vLLM as
 `--limit-mm-per-prompt={"image": 1, "audio": 0}`, while a bare `--limit-mm-per-prompt={"image":0}`
 loses its double quotes (`{image:0}`, invalid JSON) and a bare space splits the argument in two.
-vLLM's dotted form (`--limit-mm-per-prompt.image=0`) needs no quoting.
+vLLM's dotted form (`--limit-mm-per-prompt.image=0`) needs no quoting. The helm-unittest suite
+`tests/llmisvcconfigs_args_test.yaml` pins this contract on every worker preset, so a re-vendor that
+changes it fails `make helm-test`.
 
 ### Tracing preset
 
