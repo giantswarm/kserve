@@ -79,6 +79,15 @@ on the preset's serving port, and it runs under the preset's non-root security c
 `llm-d-routing-sidecar` override must ship `/app/pd-sidecar` with the flags of the
 `llm-d-router-disagg-sidecar` release the preset pins.
 
+**Engine arguments are shell words.** The script's `eval` parses every argument a second time: the
+`args` of an `LLMInferenceService`'s `main` container (they become `$@`) and `VLLM_ADDITIONAL_ARGS`
+alike, as upstream KServe ships it. A value that carries quotes, spaces or JSON is therefore quoted
+once more, inside the argument: `--limit-mm-per-prompt='{"image": 1, "audio": 0}'` (YAML:
+`- "--limit-mm-per-prompt='{\"image\": 1, \"audio\": 0}'"`) reaches vLLM as
+`--limit-mm-per-prompt={"image": 1, "audio": 0}`, while a bare `--limit-mm-per-prompt={"image":0}`
+loses its double quotes (`{image:0}`, invalid JSON) and a bare space splits the argument in two.
+vLLM's dotted form (`--limit-mm-per-prompt.image=0`) needs no quoting.
+
 ### Tracing preset
 
 The llmisvc controller has no OpenTelemetry code of its own; the data plane exports. For every
