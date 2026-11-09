@@ -1,0 +1,122 @@
+# The README's "Engine arguments are shell words" documents the worker presets' contract: the
+# vLLM start script ends in `eval "exec vllm serve … ${VLLM_ADDITIONAL_ARGS} $@"`, which parses the
+# main container's args a second time, so JSON in an argument is single-quoted inside it. This
+# suite pins that contract on every worker preset: a re-vendor that changes how the arguments
+# reach vLLM fails here, and the README section and the presets' quoting are revisited with it.
+# Run with `make helm-test`.
+suite: llmisvc preset engine arguments
+templates:
+  - templates/llmisvcconfigs/resources.yaml
+tests:
+  - it: every worker preset re-parses its engine arguments as shell words
+    set:
+      kserve.llmisvcConfigs.enabled: true
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        equal:
+          path: spec.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-template
+        matchRegex:
+          path: spec.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        equal:
+          path: spec.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-template
+        matchRegex:
+          path: spec.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        equal:
+          path: spec.prefill.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-template
+        matchRegex:
+          path: spec.prefill.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        equal:
+          path: spec.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        matchRegex:
+          path: spec.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        equal:
+          path: spec.worker.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-worker-data-parallel
+        matchRegex:
+          path: spec.worker.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-worker-data-parallel
+        equal:
+          path: spec.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-worker-data-parallel
+        matchRegex:
+          path: spec.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-worker-data-parallel
+        equal:
+          path: spec.worker.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-decode-worker-data-parallel
+        matchRegex:
+          path: spec.worker.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-worker-data-parallel
+        equal:
+          path: spec.prefill.template.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-worker-data-parallel
+        matchRegex:
+          path: spec.prefill.template.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-worker-data-parallel
+        equal:
+          path: spec.prefill.worker.containers[0].command[1]
+          value: -c
+      - documentSelector:
+          path: metadata.name
+          value: kserve-config-llm-prefill-worker-data-parallel
+        matchRegex:
+          path: spec.prefill.worker.containers[0].command[2]
+          pattern: '\$\{VLLM_ADDITIONAL_ARGS\} \\\s+\$@"\s*$'
